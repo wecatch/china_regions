@@ -1,6 +1,6 @@
 #!/bin/bash
 git branch -D gh-pages
-git push origin --delete gh-pages
+# git push origin --delete gh-pages
 git checkout -b gh-pages
 cd location-demo 
 ember build --environment gh-pages
@@ -12,5 +12,5 @@ rm -rf dist
 cd ..
 git add .
 git commit -m "Publishing to github pages"
-git push origin gh-pages
+git push origin gh-pages --force
 git checkout master
