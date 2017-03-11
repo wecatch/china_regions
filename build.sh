@@ -10,7 +10,8 @@ git rm -rf bower.json package.json testem.json
 git rm -rf .bowerrc .editorconfig .jshintrc .travis.yml
 rm -rf dist
 cd ..
+git rm -rf json js mysql postgresql
 git add .
 git commit -m "Publishing to github pages"
-git push origin gh-pages --force
+# git push origin gh-pages --force
 git checkout master

@@ -3,9 +3,18 @@
 var EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
 module.exports = function(defaults) {
-  var app = new EmberApp(defaults, {
-    // Add options here
-  });
+  var options = {};
+
+  if (process.env.EMBER_ENV === 'gh-pages') {
+      options.minifyJS = {
+        enabled: false
+      };
+      options.sourcemaps = {
+        enabled: true
+      };
+  }
+
+  var app = new EmberApp(defaults, options);
 
   // Use `app.import` to add additional libraries to the generated
   // output files.
