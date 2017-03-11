@@ -23,6 +23,10 @@ module.exports = function(environment) {
     }
   };
 
+  if(environment === 'gh-pages'){
+    ENV.baseURL = '/china_regions';
+  }
+
   if (environment === 'development') {
     // ENV.APP.LOG_RESOLVER = true;
     // ENV.APP.LOG_ACTIVE_GENERATION = true;
