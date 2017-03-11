@@ -1,0 +1,8 @@
+{
+  "name": "location-demo",
+  "dependencies": {
+    "moment": "^2.17.1",
+    "pikaday": "^1.5.1",
+    "semantic": "^2.2.9"
+  }
+}

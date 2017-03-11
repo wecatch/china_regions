@@ -1,0 +1,16 @@
+
+<div class="ui form">
+    <div class="inline fields" >
+        {{#ui-select options=provinceOptions search=true value=(mut searchOptions.province_id) placeholder="省" namePath="name" valuePath="id" }}{{/ui-select}}
+        {{#ui-select options=cityOptions placeholder="市" search=true value=(mut searchOptions.city_id) namePath="name" valuePath="id"  }}{{/ui-select}}
+        {{#ui-select options=areaOptions placeholder="地区" search=true value=(mut searchOptions.area_id) namePath="name" valuePath="id"  }}{{/ui-select}}
+    </div>
+    <p>
+        {{province.name}}
+        {{city.name}}
+        {{area.name}}
+    </p>
+    <button class="ui primary button" {{action "resetSearch"}} >重置</button>
+</div>
+
+
