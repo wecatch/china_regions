@@ -5,12 +5,12 @@ git checkout -b gh-pages
 cd location-demo 
 ember build --environment gh-pages
 mv dist/* ../.
-git rm -rf assets/themes
 git rm -rf app config tests
 git rm -rf bower.json package.json testem.json
 git rm -rf .bowerrc .editorconfig .jshintrc .travis.yml
 rm -rf dist
 cd ..
+git rm -rf assets/themes
 git rm -rf json js mysql postgresql
 git add .
 git commit -m "Publishing to github pages"
