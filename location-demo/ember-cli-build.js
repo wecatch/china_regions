@@ -7,10 +7,10 @@ module.exports = function(defaults) {
 
   if (process.env.EMBER_ENV === 'gh-pages') {
       options.minifyJS = {
-        enabled: false
+        enabled: true
       };
       options.sourcemaps = {
-        enabled: true
+        enabled: false
       };
   }
 
