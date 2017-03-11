@@ -24,7 +24,7 @@ module.exports = function(environment) {
   };
 
   if(environment === 'gh-pages'){
-    ENV.rootURL = '/china_regions'
+    ENV.rootURL = '/china_regions/'
   }
 
   if (environment === 'development') {

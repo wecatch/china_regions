@@ -9,6 +9,7 @@ git rm -rf app config tests
 git rm -rf bower.json package.json testem.json
 git rm -rf .bowerrc .editorconfig .jshintrc .travis.yml
 rm -rf dist
+rm -rf ember-welcome-page
 cd ..
 git rm -rf assets/themes
 git rm -rf json js mysql postgresql
