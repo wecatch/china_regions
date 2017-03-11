@@ -2,7 +2,7 @@ publish:
 	git branch -D gh-pages
 	# git push origin --delete gh-pages
 	git checkout -b gh-pages
-	cd location-demo
+	cd location-demo 
 	ember build --environment gh-pages
 	mv dist/* ../.
 	git rm -rf app config tests
