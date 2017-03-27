@@ -1725,7 +1725,4 @@ let city_object = {
         "id": "659000"
     }
 }
-
-export {
-    city_object
-}
+export {city_object} 

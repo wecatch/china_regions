@@ -1772,7 +1772,4 @@ let city = {
         }
     ]
 }
-
-export {
-    city
-}
+export {city} 

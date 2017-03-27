@@ -136,7 +136,4 @@ let province_object = {
         "id": "820000"
     }
 }
-
-export {
-    province_object
-}
+export {province_object} 

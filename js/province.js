@@ -101,7 +101,4 @@ let province = [{
     "name": "澳门特别行政区",
     "id": "820000"
 }, ]
-
-export {
-    province
-}
+export {province} 
