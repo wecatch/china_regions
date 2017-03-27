@@ -9,12 +9,14 @@ def main():
         js_data = 'let %s = ' % k + data + '\nexport {%s} ' % k
         out_js = codecs.open('js/%s.js' % k, 'w', 'utf-8')
         out_js.write(js_data)
-        
         json_data = json.loads(data)
         mysql_data = ''
-
         if k == 'area':
-            pass
+            index = 0
+            for p in sorted(json_data.keys()):
+                for area in json_data[p]:
+                    index += 1
+                    mysql_data += "INSERT INTO area  VALUES ('%s', '%s', '%s', '%s');\n" % (index+1, area['name'], area['id'], p)
 
         if k == 'province':
             for index, i in enumerate(json_data):

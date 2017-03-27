@@ -1,33 +1,3 @@
-/*
-Navicat MySQL Data Transfer
-
-Source Server         : localhost_3306
-Source Server Version : 50150
-Source Host           : localhost:3306
-Source Database       : linkus
-
-Target Server Type    : MYSQL
-Target Server Version : 50150
-File Encoding         : 65001
-
-Date: 2012-03-01 17:49:04
-*/
-
-SET FOREIGN_KEY_CHECKS=0;
--- ----------------------------
--- Table structure for `province`
--- ----------------------------
-DROP TABLE IF EXISTS province;
-CREATE TABLE province (
-  _id            int,
-  name           varchar(16),
-  province_id      varchar(8),
-  PRIMARY KEY (_id)
-);
-
--- ----------------------------
--- Records of province
--- ----------------------------
 INSERT INTO province VALUES ('1', '北京市', '110000');
 INSERT INTO province VALUES ('2', '天津市', '120000');
 INSERT INTO province VALUES ('3', '河北省', '130000');
