@@ -37,6 +37,26 @@ def main():
             out_mysql.write(mysql_data)
 
 
+def pull_data():
+    province_object_d = json.loads(
+        codecs.open('json/province_object.json', 'r', 'utf-8').read())
+    cdata = codecs.open('src/city.json', 'r', 'utf-8').read()
+    c_json = json.loads(cdata)
+    index = 0
+    city_object_d = {}
+    for c in c_json:
+        if int(c['id']) % 100 == 0:
+            index += 1
+            city_object_d[c['id']] = {
+                "name": c['name'],
+                "province": province_object_d[c['id'][0:2] + '0000']['name'],
+                "id": c['id']
+            }
+
+    out_city_object = codecs.open('json/city_object.json', 'w', 'utf-8')
+    out_city_object.write(city_object_d)
+
 
 if __name__ == '__main__':
-    main()
+    pass
+    #pull_data()

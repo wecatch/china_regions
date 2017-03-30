@@ -74,5 +74,4 @@ console.save = function(data, filename){
 })(console)
 
 
-console.save(JSON.stringify(provinceArray), 'province.json')
 console.save(JSON.stringify(cityArray), 'city.json')
