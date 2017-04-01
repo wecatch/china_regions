@@ -15,5 +15,5 @@ git rm -rf assets/themes
 git rm -rf json js mysql postgresql
 git add .
 git commit -m "Publishing to github pages"
-# git push origin gh-pages --force
+git push origin gh-pages --force
 git checkout master
