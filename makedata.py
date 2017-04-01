@@ -19,7 +19,7 @@ def main():
             for p in sorted(json_data.keys()):
                 for area in json_data[p]:
                     index += 1
-                    mysql_data += "INSERT INTO area  VALUES ('%s', '%s', '%s', '%s');\n" % (index+1, area['name'], area['id'], p) # noqa
+                    mysql_data += "INSERT INTO area  VALUES ('%s', '%s', '%s', '%s');\n" % (index, area['name'], area['id'], p) # noqa
 
         if k == 'province':
             for index, i in enumerate(json_data):
@@ -30,7 +30,7 @@ def main():
             for p in sorted(json_data.keys()):
                 for city in json_data[p]:
                     index += 1
-                    mysql_data += "INSERT INTO city VALUES ('%s', '%s', '%s', '%s');\n" % (index+1, city['id'], city['name'], p)
+                    mysql_data += "INSERT INTO city VALUES ('%s', '%s', '%s', '%s');\n" % (index, city['id'], city['name'], p) # noqa
 
         if k in ['province', 'city', 'area']:
             out_mysql = codecs.open('mysql/%s.sql' % k, 'w', 'utf-8')
