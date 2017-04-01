@@ -130,9 +130,11 @@ let province_object = {
     "810000": {
         "name": "香港特别行政区",
         "id": "810000"
+    },
+    "820000": {
+        "name": "澳门特别行政区",
+        "id": "820000"
     }
 }
 
-export {
-    province_object
-}
+export {province_object} 
