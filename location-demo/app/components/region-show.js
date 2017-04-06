@@ -38,10 +38,17 @@ export default Ember.Component.extend({
         let provinceId = this.get('searchOptions.province_id')
         this.set('cityOptions', this.get('region').getCity(provinceId));
         this.set('areaOptions', []);
+        this.get('searchOptions').setProperties({
+            city_id: '',
+            area_id: '',
+        });
     }),
     cityChange: observer('searchOptions.city_id', function() {
         let cityId = this.get('searchOptions.city_id');
         this.set('areaOptions', this.get('region').getArea(cityId));
+        this.get('searchOptions').setProperties({
+            area_id: '',
+        });
     }),
     initRegion(){
         let provinceId = this.get('searchOptions.province_id')
