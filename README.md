@@ -2,6 +2,10 @@
 
 最全最新中国省，市，地区 json 及 sql 数据，自动抓取国标 http://www.stats.gov.cn/tjsj/tjbz/xzqhdm/201703/t20170310_1471429.html 数据，并且自动生成 JavaScript es6 module 以及 sql 数据。
 
+## 演示地址
+
+http://wecatch.me/china_regions/
+
 ## 如何使用
 
 数据分 json、es6 module、sql 三种格式存储，es6 module 和 sql 是根据 json 自动生成，json 数据又是根据最新国标生成，
