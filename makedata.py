@@ -4,7 +4,7 @@ import codecs
 from collections import OrderedDict
 
 
-def main():
+def make_data():
     source_file_list = [
         'area', 'area_object', 'city', 'city_object', 'province', 'province_object']
     for k in source_file_list:
@@ -60,9 +60,11 @@ def pull_data():
                 "id": c['id']
             }
             current_city = obj
-            city_object_d[c['id']] = obj
-            city_d.setdefault(c['id'][0:2] + '0000', []).append(obj)
-            area_d.setdefault(c['id'], [])
+            # 跳过国标页面由于 html 结构不同导致省份进入城市 json 数据
+            if not obj['id'] in province_object_d.keys():
+                city_object_d[c['id']] = obj
+                city_d.setdefault(c['id'][0:2] + '0000', []).append(obj)
+                area_d.setdefault(c['id'], [])
             continue
 
         if int(c['id']) % 1000 == 0:
@@ -86,7 +88,11 @@ def pull_data():
     out_area.write(json.dumps(area_d, ensure_ascii=False, indent=4))
 
 
+def main():
+    pull_data()
+    make_data()
+
+
 if __name__ == '__main__':
-    pass
-    # pull_data()
+    print("please call main")
     # main()
