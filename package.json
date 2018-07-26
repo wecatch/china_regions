@@ -1,5 +1,5 @@
 {
-  "name": "@mofe/china_regions",
+  "name": "china_regions",
   "version": "1.0.0",
   "files": [
     "js/*",
