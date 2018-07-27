@@ -1,6 +1,6 @@
 # china_regions
 
-最全最新中国省，市，地区 json 及 sql 数据，自动抓取国标 http://www.stats.gov.cn/tjsj/tjbz/xzqhdm/201703/t20170310_1471429.html 数据，并且自动生成 JavaScript es6 module 以及 sql 数据。
+最全最新中国省，市，地区 json 及 sql 数据，自动抓取国标 http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2017/index.html 数据，并且自动生成 JavaScript es6 module 以及 sql 数据。
 
 ## 演示地址
 

@@ -4,5 +4,25 @@
   "files": [
     "js/*",
     "json/*"
-  ]
+  ],
+  "description": "最全最新中国省，市，地区数据",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wecatch/china_regions.git"
+  },
+  "keywords": [
+    "china",
+    "regions",
+    "datasource"
+  ],
+  "author": "wecatch.me",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wecatch/china_regions/issues"
+  },
+  "homepage": "https://github.com/wecatch/china_regions#readme"
 }
