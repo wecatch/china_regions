@@ -4,8 +4,8 @@ const jsdom = require("jsdom");
 const path = require("path");
 const Promise = require("bluebird");
 const log = require('tracer').console();
-// const request = Promise.promisifyAll(require("request"), {multiArgs: true});
-const request = require("request");
+const request = Promise.promisifyAll(require("request"), {multiArgs: true});
+// const request = require("request");
 
 
 const host = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/";
@@ -40,78 +40,132 @@ function renderDom(html) {
 }
 
 
-function newRequestPromise(url){
+function newRequestPromise(url) {
+    log.debug(url);
 
-
-    return 
-
-    return new Promise(function(resolve, reject){
-        request({
-            url: url,
-            encoding: null
-        }, function(error, response, body) {
-            if (response.statusCode == 200) {
-                resolve(response, body);
-            } else {
-                //some error handling
-                reject(error)
-            }
-        });
+    return request.getAsync({
+        url: url,
+        encoding: null
     });
+    // promise resolve only accept value
+    // return new Promise(function(resolve, reject) {
+    //     request({
+    //     }, function(error, response, body) {
+    //         log.debug(response.statusCode);
+    //         log.debug(response.body);
+    //         if (response.statusCode == 200) {
+    //             resolve([response, response.body]);
+    //         } else {
+    //             //some error handling
+    //             reject(error)
+    //         }
+    //     });
+    // }, );
 }
+
+
+const provincePath = 'src/province.json';
+const cityPath = 'src/city.json';
+const countryPath = 'src/country.json';
+const townPath = 'src/town.json';
+const villagePath = 'src/village.json';
+
+const fileExists = {}
+fileExists.provincePath = fs.existsSync(provincePath);
+fileExists.cityPath = fs.existsSync(cityPath);
+fileExists.countryPath = fs.existsSync(countryPath);
+fileExists.townPath = fs.existsSync(townPath);
+fileExists.villagePath = fs.existsSync(villagePath);
 
 
 function requestProvince() {
 
     // request provice
-    newRequestPromise(host).then(function(response, body){
-        return parseProvice(iconv.decode(body, 'gb2312')); 
-    }).then(function(proviceResult){
+    newRequestPromise(host).spread(function(response, body) {
+        return parseProvice(iconv.decode(body, 'gb2312'));
+    }).then(function(proviceResult) {
         // request city
-        fs.writeFileSync('src/provice.json', JSON.stringify(proviceResult));
-        return Promise.all(proviceResult.map(function(item){
-            return newRequestPromise(item.url);
-        }));
-    }).then(function(respResults){
+        fs.writeFileSync(provincePath, JSON.stringify(proviceResult));
+        if (fileExists.cityPath) {
+            return JSON.parse(fs.readFileSync(cityPath))
+        } else {
+            return Promise.all(proviceResult.map(function(item) {
+                return newRequestPromise(item.url);
+            }));
+        }
+    }).then(function(respResults) {
         let urls = [];
-        respResults.forEach(function(item, index){
-            urls = urls.concat(parseCity(iconv.decode(item[1], 'gb2312'), host));
-        })
+        if (!fileExists.cityPath) {
+            respResults.forEach(function(item, index) {
+                urls = urls.concat(parseCity(iconv.decode(item[1], 'gb2312'), host));
+            })
+            fs.writeFileSync(cityPath, JSON.stringify(urls));
+        } else {
+            //已经存在表示已经爬取到了 city 信息
+            urls = respResults;
+        }
 
-        fs.writeFileSync('src/city.json', JSON.stringify(urls));
-        // request country
-        return Promise.all(urls.filter(x=>x.url.length > 0).map(function(item){
-            return newRequestPromise(item.url);
-        }))
-    }).then(function(respResults){
-        let urls = [];
-        respResults.forEach(function(item, index){
-            urls = urls.concat(parseCountry(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href))); 
-        });
+        // 已经存在 country 信息
+        if (fileExists.countryPath) {
+            return JSON.parse(fs.readFileSync(countryPath));
+        } else {
+            // request country
+            return Promise.all(urls.filter(x => x.url.length > 0).map(function(item) {
+                return newRequestPromise(item.url);
+            }))
+        }
 
-        fs.writeFileSync('src/country.json', JSON.stringify(urls));
-        // request town
-        return Promise.all(urls.filter(x=>x.url.length).map(function(item){
-            return newRequestPromise(item.url);
-        }))
-    }).then(function(respResults){
+    }).then(function(respResults) {
         let urls = [];
-        respResults.forEach(function(item, index){
-            urls = urls.concat(parseTown(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href))); 
-        });
+        if (!fileExists.countryPath) {
+            respResults.forEach(function(item, index) {
+                urls = urls.concat(parseCountry(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href)));
+            });
+            fs.writeFileSync(countryPath, JSON.stringify(urls));
+        } else {
+            //已经存在表示已经爬取到了 country 信息
+            urls = respResults;
+        }
 
-        fs.writeFileSync('src/town.json', JSON.stringify(urls));
-        // request town
-        return Promise.all(urls.filter(x=>x.url.length).map(function(item){
-            return newRequestPromise(item.url);
-        }))
-    }).then(function(respResults){
+        // 已经存在 town 信息
+        if (fileExists.townPath) {
+            return JSON.parse(fs.readFileSync(townPath));
+        } else {
+            // request town
+            return Promise.all(urls.filter(x => x.url.length > 0).map(function(item) {
+                return newRequestPromise(item.url);
+            }))
+        }
+    }).then(function(respResults) {
         let urls = [];
-        respResults.forEach(function(item, index){
-            urls = urls.concat(parseVillage(iconv.decode(item[1], 'gb2312'))); 
-        });
-        fs.writeFileSync('src/village.json', JSON.stringify(urls));
-    }).catch(function(error){
+        if (!fileExists.townPath) {
+            respResults.forEach(function(item, index) {
+                urls = urls.concat(parseTown(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href)));
+            });
+
+            fs.writeFileSync(townPath, JSON.stringify(urls));
+        } else {
+            urls = respResults;
+        }
+
+        if (fileExists.villagePath) {
+            return JSON.parse(fs.readFileSync(villagePath))
+        } else {
+            // request village
+            return Promise.all(urls.filter(x => x.url.length > 0).map(function(item) {
+                return newRequestPromise(item.url);
+            }))
+        }
+    }).then(function(respResults) {
+        let urls = [];
+        if (!fileExists.villagePath) {
+            respResults.forEach(function(item, index) {
+                urls = urls.concat(parseVillage(iconv.decode(item[1], 'gb2312')));
+            });
+            fs.writeFileSync('src/village.json', JSON.stringify(urls));
+        }
+
+    }).catch(function(error) {
         log.debug("error while fetching url ==> ", error);
     });
 }
@@ -197,7 +251,7 @@ function parseCountry(html, parentUrl) {
 //  towntr 
 function parseTown(html, parentUrl) {
     let $ = renderDom(html);
-    let result = []; 
+    let result = [];
     $("tr.towntr").each(function(index, element) {
         let td0 = null,
             td1 = null,
