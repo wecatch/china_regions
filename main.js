@@ -1,14 +1,14 @@
-const request = require('request');
+const fs = require("fs");
 const iconv = require('iconv-lite');
 const jsdom = require("jsdom");
 const path = require("path");
+const Promise = require("bluebird");
+const log = require('tracer').console();
+// const request = Promise.promisifyAll(require("request"), {multiArgs: true});
+const request = require("request");
 
-const log4js = require('log4js');
-const log = log4js.getLogger();
-log.level = 'debug';
 
-
-const host = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2017/";
+const host = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/";
 // const host = "http://localhost:8000";
 
 
@@ -40,107 +40,101 @@ function renderDom(html) {
 }
 
 
-function requestProvince() {
-    request({
-        url: host,
-        encoding: null
-    }, function(error, response, body) {
-        log.debug('error:', error); // Print the error if one occurred
-        if (response.statusCode == 200) {
-            requestCity(parseProvice(iconv.decode(body, 'gb2312')));
-        } else {
-            //some error handling
-            log.debug("error while fetching url");
-        }
+function newRequestPromise(url){
+
+
+    return 
+
+    return new Promise(function(resolve, reject){
+        request({
+            url: url,
+            encoding: null
+        }, function(error, response, body) {
+            if (response.statusCode == 200) {
+                resolve(response, body);
+            } else {
+                //some error handling
+                reject(error)
+            }
+        });
     });
 }
 
 
-function requestCity(proviceObject) {
-    for (variable in proviceObject) {
-        if (proviceObject.hasOwnProperty(variable)) {
-            let url = proviceObject[variable];
-            request({
-                url: url,
-                encoding: null
-            }, function(error, response, body) {
-                requestCountry(parseCity(iconv.decode(body, 'gb2312'), host));
-            });
-        }
-    }
-}
+function requestProvince() {
 
-function requestCountry(cityObject) {
-    for (variable in cityObject) {
-        if (cityObject.hasOwnProperty(variable)) {
-            let city = cityObject[variable];
-            if (city.url) {
-                request({
-                    url: city.url,
-                    encoding: null
-                }, function(error, response, body) {
-                    requestTown(parseCountry(iconv.decode(body, 'gb2312'), absolutePath(city.url)));
-                });
-            }
-        }
-    }
-}
+    // request provice
+    newRequestPromise(host).then(function(response, body){
+        return parseProvice(iconv.decode(body, 'gb2312')); 
+    }).then(function(proviceResult){
+        // request city
+        fs.writeFileSync('src/provice.json', JSON.stringify(proviceResult));
+        return Promise.all(proviceResult.map(function(item){
+            return newRequestPromise(item.url);
+        }));
+    }).then(function(respResults){
+        let urls = [];
+        respResults.forEach(function(item, index){
+            urls = urls.concat(parseCity(iconv.decode(item[1], 'gb2312'), host));
+        })
 
+        fs.writeFileSync('src/city.json', JSON.stringify(urls));
+        // request country
+        return Promise.all(urls.filter(x=>x.url.length > 0).map(function(item){
+            return newRequestPromise(item.url);
+        }))
+    }).then(function(respResults){
+        let urls = [];
+        respResults.forEach(function(item, index){
+            urls = urls.concat(parseCountry(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href))); 
+        });
 
-function requestTown(countryObject) {
-    for (variable in countryObject) {
-        if (countryObject.hasOwnProperty(variable)) {
-            let country = countryObject[variable];
-            log.debug('requestTown ==> ', country);
-            if (country.url) {
-                request({
-                    url: country.url,
-                    encoding: null
-                }, function(error, response, body) {
-                    requestVillage(parseTown(iconv.decode(body, 'gb2312'), absolutePath(country.url)));
-                });
-            }
-        }
-    }
-}
+        fs.writeFileSync('src/country.json', JSON.stringify(urls));
+        // request town
+        return Promise.all(urls.filter(x=>x.url.length).map(function(item){
+            return newRequestPromise(item.url);
+        }))
+    }).then(function(respResults){
+        let urls = [];
+        respResults.forEach(function(item, index){
+            urls = urls.concat(parseTown(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href))); 
+        });
 
-
-function requestVillage(townObject) {
-    for (variable in townObject) {
-        if (townObject.hasOwnProperty(variable)) {
-            let town = townObject[variable];
-            log.debug('requestVillage ==> ',town);
-            if (town.url) {
-                request({
-                    url: town.url,
-                    encoding: null
-                }, function(error, response, body) {
-                    parseVillage(iconv.decode(body, 'gb2312'));
-                });
-            }
-        }
-    }
+        fs.writeFileSync('src/town.json', JSON.stringify(urls));
+        // request town
+        return Promise.all(urls.filter(x=>x.url.length).map(function(item){
+            return newRequestPromise(item.url);
+        }))
+    }).then(function(respResults){
+        let urls = [];
+        respResults.forEach(function(item, index){
+            urls = urls.concat(parseVillage(iconv.decode(item[1], 'gb2312'))); 
+        });
+        fs.writeFileSync('src/village.json', JSON.stringify(urls));
+    }).catch(function(error){
+        log.debug("error while fetching url ==> ", error);
+    });
 }
 
 
 function parseProvice(html) {
     let $ = renderDom(html)
-    //let's start extracting the data
-    let provinceItems = $(".provincetr a");
-    let proviceObject = {}
-    provinceItems.each(function(index, element) {
-        proviceObject[$(this).text()] = joinUrl(host, $(this).attr("href"));
+    let result = [];
+    $(".provincetr a").each(function(index, element) {
+        result.push({
+            name: $(element).text(),
+            url: joinUrl(host, $(element).attr("href")),
+        })
     });
 
-    return proviceObject;
+    return result;
 }
 
 // citytr
 function parseCity(html, parentUrl) {
     let $ = renderDom(html);
-    let cityObject = {};
-    let cityItems = $("tr.citytr")
-    cityItems.each(function(index, element) {
+    let result = [];
+    $("tr.citytr").each(function(index, element) {
         let td0 = null,
             td1 = null,
             url = "";
@@ -156,24 +150,22 @@ function parseCity(html, parentUrl) {
         if (td0.attr("href")) {
             url = joinUrl(parentUrl, td0.attr("href"));
         }
-        cityObject[id] = {
+        result.push({
             id: id,
             name: name,
             url: url
-        }
+        });
     });
 
-
-    return cityObject;
+    return result;
 
 }
 
 // countytr
 function parseCountry(html, parentUrl) {
     let $ = renderDom(html);
-    let countryObject = {};
-    let countryItems = $("tr.countytr")
-    countryItems.each(function(index, element) {
+    let result = [];
+    $("tr.countytr").each(function(index, element) {
         let td0 = null,
             td1 = null,
             url = "";
@@ -189,15 +181,15 @@ function parseCountry(html, parentUrl) {
         if (td0.attr("href")) {
             url = joinUrl(parentUrl, td0.attr("href"));
         }
-        countryObject[id] = {
+        result.push({
             id: id,
             name: name,
             url: url
-        }
+        });
     });
 
 
-    return countryObject;
+    return result;
 
 }
 
@@ -205,9 +197,8 @@ function parseCountry(html, parentUrl) {
 //  towntr 
 function parseTown(html, parentUrl) {
     let $ = renderDom(html);
-    let townObject = {};
-    let townItems = $("tr.towntr")
-    townItems.each(function(index, element) {
+    let result = []; 
+    $("tr.towntr").each(function(index, element) {
         let td0 = null,
             td1 = null,
             url = "";
@@ -223,35 +214,34 @@ function parseTown(html, parentUrl) {
         if (td0.attr("href")) {
             url = joinUrl(parentUrl, td0.attr("href"));
         }
-        townObject[id] = {
+        result.push({
             id: id,
             name: name,
             url: url
-        }
+        });
     });
 
+    log.debug(result);
 
-    return townObject;
+    return result;
 }
 
 // villagetr
 function parseVillage(html) {
     let $ = renderDom(html);
-    let villageObject = {};
-    let villageItems = $("tr.villagetr")
-    villageItems.each(function(index, element) {
+    let result = [];
+    $("tr.villagetr").each(function(index, element) {
         let td0 = $(this).find("td").first();
         let td1 = $(this).find("td").last();
         let id = td0.text();
         let name = td1.text();
-        villageObject[id] = {
+        result.push({
             id: id,
             name: name,
-        }
+        });
     });
 
-
-    return villageObject;
+    return result;
 }
 
 
