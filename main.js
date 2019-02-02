@@ -5,10 +5,10 @@ const path = require("path");
 const Promise = require("bluebird");
 const log = require('tracer').console();
 const request = Promise.promisifyAll(require("request"), {multiArgs: true});
-// const request = require("request");
+const requestSync = require("request");
 
 
-const host = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/";
+const host = "http://219.235.129.117:80/tjsj/tjbz/tjyqhdmhcxhfdm/2018/";
 // const host = "http://localhost:8000";
 
 
@@ -41,11 +41,12 @@ function renderDom(html) {
 
 
 function newRequestPromise(url) {
-    log.debug(url);
-
+    url = url.replace('www.stats.gov.cn', '219.235.129.117:80');
+    log.debug('request == >', url);
     return request.getAsync({
         url: url,
-        encoding: null
+        encoding: null,
+        timeout: 50000
     });
     // promise resolve only accept value
     // return new Promise(function(resolve, reject) {
@@ -79,11 +80,21 @@ fileExists.villagePath = fs.existsSync(villagePath);
 
 
 function requestProvince() {
-
     // request provice
-    newRequestPromise(host).spread(function(response, body) {
-        return parseProvice(iconv.decode(body, 'gb2312'));
-    }).then(function(proviceResult) {
+    if (fileExists.provincePath){
+        return new Promise(function(resolve, reject){
+            resolve(JSON.parse(fs.readFileSync(provincePath)));
+        });
+    }else {
+        return newRequestPromise(host).spread(function(response, body) {
+            return parseProvice(iconv.decode(body, 'gb2312'));
+        })
+    }
+    
+}
+
+function main(){
+    requestProvince().then(function(proviceResult) {
         // request city
         fs.writeFileSync(provincePath, JSON.stringify(proviceResult));
         if (fileExists.cityPath) {
@@ -253,6 +264,7 @@ function parseTown(html, parentUrl) {
     let $ = renderDom(html);
     let result = [];
     $("tr.towntr").each(function(index, element) {
+        log.debug(element)
         let td0 = null,
             td1 = null,
             url = "";
@@ -275,7 +287,7 @@ function parseTown(html, parentUrl) {
         });
     });
 
-    log.debug(result);
+    // log.debug(result);
 
     return result;
 }
@@ -299,4 +311,22 @@ function parseVillage(html) {
 }
 
 
-requestProvince()
+// main();
+
+
+function pullTownData(){
+    JSON.parse(fs.readFileSync(countryPath)).slice(0, 1).forEach(function(element, index) {
+        let urls = [];
+        requestSync({
+            url: element.url,
+            encoding: null
+        }, function(error, response, body){
+            urls = JSON.parse(fs.readFileSync(townPath));
+            urls = urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
+            fs.writeFileSync(townPath, JSON.stringify(urls));
+        });
+        // newRequestPromise(element.url).spread(function(response, body){
+        //     urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(response.element.href)));
+        // });
+    });
+}
