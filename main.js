@@ -318,6 +318,29 @@ function parseVillage(html) {
 }
 
 
+function pullCountryDataSync() {
+    let offset = 0
+    JSON.parse(fs.readFileSync(cityPath)).slice(offset).forEach(function(element, index) {
+        let urls = [];
+        let url = element.url.replace('www.stats.gov.cn', IP);
+        log.debug(url);
+        if (url){
+            requestSync({
+                url: url,
+                encoding: null
+            }, function(error, response, body) {
+                //空的文件内容必须是 []
+                urls = JSON.parse(fs.readFileSync(countryPath));
+                urls = urls.concat(parseCountry(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
+                fs.writeFileSync(countryPath, JSON.stringify(urls));
+                log.debug('foreach ==> ', offset + index);
+            });
+            sleep(500);
+        }
+    });
+}
+
+
 //由于数据量很大，统计局的服务器在接受大量连接时会莫名 hang 住，所以通过输出 index，不断计算偏移量，方便下一次计算
 //第一次从 0 开始，假如输出 index 是 3000，则下一次爬取时偏移量应该是 3001，可以通过 sleep 适当控制爬取的速度，sleep 是直接让 nodejs event loop 停住
 function pullTownDataSync() {
@@ -331,6 +354,7 @@ function pullTownDataSync() {
                 url: url,
                 encoding: null
             }, function(error, response, body) {
+                //空的文件内容必须是 []
                 urls = JSON.parse(fs.readFileSync(townPath));
                 urls = urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
                 fs.writeFileSync(townPath, JSON.stringify(urls));
@@ -341,16 +365,40 @@ function pullTownDataSync() {
     });
 }
 
-
-function pullTownDataAsync() {
-    Promise.all(JSON.parse(fs.readFileSync(countryPath)).filter(x => x.url.length > 0).map(x => newRequestPromise(x.url))).then(function(respResults) {
+function pullVillageDataSync() {
+    let offset = 1
+    JSON.parse(fs.readFileSync(townPath)).slice(offset).forEach(function(element, index) {
         let urls = [];
-        respResults.forEach(function(item, index) {
-            urls = urls.concat(parseTown(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href)));
-        });
+        let url = element.url.replace('www.stats.gov.cn', IP);
+        log.debug(url);
+        if (url){
+            requestSync({
+                url: url,
+                encoding: null
+            }, function(error, response, body) {
+                //空的文件内容必须是 []
+                urls = JSON.parse(fs.readFileSync(villagePath));
+                urls = urls.concat(parseVillage(iconv.decode(body, 'gb2312')));
+                fs.writeFileSync(villagePath, JSON.stringify(urls));
+                log.debug('foreach ==> ', offset + index);
+            });
+            sleep(500);
+        }
     });
 }
 
 
-// main()
+// function pullTownDataAsync() {
+//     Promise.all(JSON.parse(fs.readFileSync(countryPath)).filter(x => x.url.length > 0).map(x => newRequestPromise(x.url))).then(function(respResults) {
+//         let urls = [];
+//         respResults.forEach(function(item, index) {
+//             urls = urls.concat(parseTown(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href)));
+//         });
+//     });
+// }
+
+
+// main();
+// pullCountryDataSync();
 // pullTownDataSync();
+pullVillageDataSync()
