@@ -367,6 +367,7 @@ function pullTownDataSync() {
 
 function pullVillageDataSync() {
     let offset = 1
+    //6656
     JSON.parse(fs.readFileSync(townPath)).slice(offset).forEach(function(element, index) {
         let urls = [];
         let url = element.url.replace('www.stats.gov.cn', IP);
