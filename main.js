@@ -6,6 +6,8 @@ const Promise = require("bluebird");
 const log = require('tracer').console();
 const request = Promise.promisifyAll(require("request"), {multiArgs: true});
 const requestSync = require("request");
+const sleep = require('system-sleep');
+
 
 
 const host = "http://219.235.129.117:80/tjsj/tjbz/tjyqhdmhcxhfdm/2018/";
@@ -311,22 +313,37 @@ function parseVillage(html) {
 }
 
 
-// main();
-
-
-function pullTownData(){
-    JSON.parse(fs.readFileSync(countryPath)).slice(0, 1).forEach(function(element, index) {
+function pullTownDataSync() {
+    JSON.parse(fs.readFileSync(countryPath)).forEach(function(element, index) {
         let urls = [];
-        requestSync({
-            url: element.url,
-            encoding: null
-        }, function(error, response, body){
-            urls = JSON.parse(fs.readFileSync(townPath));
-            urls = urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
-            fs.writeFileSync(townPath, JSON.stringify(urls));
-        });
-        // newRequestPromise(element.url).spread(function(response, body){
-        //     urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(response.element.href)));
-        // });
+        let url = element.url.replace('www.stats.gov.cn', '219.235.129.117:80');
+        if (url){
+            requestSync({
+                url: url,
+                encoding: null
+            }, function(error, response, body) {
+                log.debug(error)
+                log.debug(response)
+                log.debug(body)
+                urls = JSON.parse(fs.readFileSync(townPath));
+                urls = urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
+                fs.writeFileSync(townPath, JSON.stringify(urls));
+                log.debug('foreach ==> ', index);
+            });
+            sleep(500);
+        }
     });
 }
+
+
+function pullTownDataAsync() {
+    Promise.all(JSON.parse(fs.readFileSync(countryPath)).filter(x => x.url.length > 0).map(x => newRequestPromise(x.url))).then(function(respResults) {
+        let urls = [];
+        respResults.forEach(function(item, index) {
+            urls = urls.concat(parseTown(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href)));
+        });
+    });
+}
+
+
+pullTownDataSync();
