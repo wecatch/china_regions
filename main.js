@@ -10,8 +10,12 @@ const sleep = require('system-sleep');
 
 
 
-const host = "http://219.235.129.117:80/tjsj/tjbz/tjyqhdmhcxhfdm/2018/";
-// const host = "http://localhost:8000";
+const host = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/";
+//这个 ip 是通过 dns 工具直接解析出来的，因为大量爬取需要进行多次 dns 解析，时间长了 nodejs 会报 dns 解析错误
+//应该是有缓存的，但是还是报 dns 解析有问题，这个 ip 可能会变，在使用时可以实时解析一下统计局的网站域名，如果不使用 ip
+//则把 IP 内容换成域名即可
+// const IP = 'www.stats.gov.cn'
+const IP = '219.235.129.117:80'
 
 
 function absolutePath(url) {
@@ -43,7 +47,7 @@ function renderDom(html) {
 
 
 function newRequestPromise(url) {
-    url = url.replace('www.stats.gov.cn', '219.235.129.117:80');
+    url = url.replace('www.stats.gov.cn', IP);
     log.debug('request == >', url);
     return request.getAsync({
         url: url,
@@ -96,6 +100,9 @@ function requestProvince() {
 }
 
 function main(){
+    //从省份开始爬取 有统计局的网站并发能力有限，使用 promise.All 爬完 country 级别的信息时服务器就连接不上了
+    //代码里预制了从已经爬取到的文件中获取连接继续爬的能力
+    //由于从 country 开始信息量已经很大了，一般服务器会直接报错 可以使用 pullTownDataSync 从本地文件读取 country 信息继续爬
     requestProvince().then(function(proviceResult) {
         // request city
         fs.writeFileSync(provincePath, JSON.stringify(proviceResult));
@@ -266,7 +273,6 @@ function parseTown(html, parentUrl) {
     let $ = renderDom(html);
     let result = [];
     $("tr.towntr").each(function(index, element) {
-        log.debug(element)
         let td0 = null,
             td1 = null,
             url = "";
@@ -289,7 +295,6 @@ function parseTown(html, parentUrl) {
         });
     });
 
-    // log.debug(result);
 
     return result;
 }
@@ -313,22 +318,23 @@ function parseVillage(html) {
 }
 
 
+//由于数据量很大，统计局的服务器在接受大量连接时会莫名 hang 住，所以通过输出 index，不断计算偏移量，方便下一次计算
+//第一次从 0 开始，假如输出 index 是 3000，则下一次爬取时偏移量应该是 3001，可以通过 sleep 适当控制爬取的速度，sleep 是直接让 nodejs event loop 停住
 function pullTownDataSync() {
-    JSON.parse(fs.readFileSync(countryPath)).forEach(function(element, index) {
+    let offset = 0
+    JSON.parse(fs.readFileSync(countryPath)).slice(offset).forEach(function(element, index) {
         let urls = [];
-        let url = element.url.replace('www.stats.gov.cn', '219.235.129.117:80');
+        let url = element.url.replace('www.stats.gov.cn', IP);
+        log.debug(url);
         if (url){
             requestSync({
                 url: url,
                 encoding: null
             }, function(error, response, body) {
-                log.debug(error)
-                log.debug(response)
-                log.debug(body)
                 urls = JSON.parse(fs.readFileSync(townPath));
                 urls = urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
                 fs.writeFileSync(townPath, JSON.stringify(urls));
-                log.debug('foreach ==> ', index);
+                log.debug('foreach ==> ', offset + index);
             });
             sleep(500);
         }
@@ -346,4 +352,5 @@ function pullTownDataAsync() {
 }
 
 
-pullTownDataSync();
+// main()
+// pullTownDataSync();
