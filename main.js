@@ -366,12 +366,13 @@ function pullTownDataSync() {
 }
 
 function pullVillageDataSync() {
-    let offset = 1
-    //6656
+    let offset = 13993
     JSON.parse(fs.readFileSync(townPath)).slice(offset).forEach(function(element, index) {
+        // log.debug(element)
+        // throw Error("base");
         let urls = [];
         let url = element.url.replace('www.stats.gov.cn', IP);
-        log.debug(url);
+        log.debug(element)
         if (url){
             requestSync({
                 url: url,
