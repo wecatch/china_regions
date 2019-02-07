@@ -76,6 +76,7 @@ const cityPath = 'src/city.json';
 const countryPath = 'src/country.json';
 const townPath = 'src/town.json';
 const villagePath = 'src/village.json';
+const villagePathBackup = 'src/village_backup.json';
 
 const fileExists = {}
 fileExists.provincePath = fs.existsSync(provincePath);
@@ -366,10 +367,11 @@ function pullTownDataSync() {
 }
 
 function pullVillageDataSync() {
-    let offset = 13993
+    let offset = 14154
     JSON.parse(fs.readFileSync(townPath)).slice(offset).forEach(function(element, index) {
         // log.debug(element)
         // throw Error("base");
+        fs.copyFileSync(villagePath, villagePathBackup)
         let urls = [];
         let url = element.url.replace('www.stats.gov.cn', IP);
         log.debug(element)
