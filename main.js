@@ -367,10 +367,10 @@ function pullTownDataSync() {
 }
 
 function pullVillageDataSync() {
-    let offset = 14154
+    let offset = 0
     JSON.parse(fs.readFileSync(townPath)).slice(offset).forEach(function(element, index) {
         // log.debug(element)
-        // throw Error("base");
+        // throw Error("offset error");
         fs.copyFileSync(villagePath, villagePathBackup)
         let urls = [];
         let url = element.url.replace('www.stats.gov.cn', IP);
@@ -405,4 +405,4 @@ function pullVillageDataSync() {
 // main();
 // pullCountryDataSync();
 // pullTownDataSync();
-pullVillageDataSync()
+// pullVillageDataSync()
