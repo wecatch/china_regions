@@ -19,18 +19,18 @@ def make_data():
             for p in sorted(json_data.keys()):
                 for area in json_data[p]:
                     index += 1
-                    mysql_data += "INSERT INTO area  VALUES ('%s', '%s', '%s', '%s');\n" % (index, area['name'], area['id'], p) # noqa
+                    mysql_data += "INSERT INTO area  VALUES ('%s', '%s', '%s', '%s');\n" % (index, area['name'], area['id'], p)  # noqa
 
         if k == 'province':
             for index, i in enumerate(json_data):
-                mysql_data += "INSERT INTO province VALUES ('%s', '%s', '%s');\n" % (index+1, i['name'], i['id']) # noqa
+                mysql_data += "INSERT INTO province VALUES ('%s', '%s', '%s');\n" % (index + 1, i['name'], i['id'])  # noqa
 
         if k == 'city':
             index = 0
             for p in sorted(json_data.keys()):
                 for city in json_data[p]:
                     index += 1
-                    mysql_data += "INSERT INTO city VALUES ('%s', '%s', '%s', '%s');\n" % (index, city['id'], city['name'], p) # noqa
+                    mysql_data += "INSERT INTO city VALUES ('%s', '%s', '%s', '%s');\n" % (index, city['id'], city['name'], p)  # noqa
 
         if k in ['province', 'city', 'area']:
             out_mysql = codecs.open('mysql/%s.sql' % k, 'w', 'utf-8')
@@ -40,60 +40,74 @@ def make_data():
             out_mysql.write(mysql_data)
 
 
-
 def pull_data():
-    province_object_d = json.loads(
+    province_object_json = json.loads(
         codecs.open('json/province_object.json', 'r', 'utf-8').read())
-    cdata = codecs.open('src/city.json', 'r', 'utf-8').read()
-    c_json = json.loads(cdata)
-    index = 0
+    city_json = json.loads(codecs.open('src/city.json', 'r', 'utf-8').read())
+    country_json = json.loads(codecs.open('src/country.json', 'r', 'utf-8').read())
+    town_json = json.loads(codecs.open('src/town.json', 'r', 'utf-8').read())
     city_object_d = OrderedDict()
     city_d = OrderedDict()
-    country_object_d = OrderedDict()
-    country_d = OrderedDict()
-    current_city = {}
-    for c in c_json:
-        if int(c['id']) % 100 == 0:
-            index += 1
-            obj = {
-                "province": province_object_d[c['id'][0:2] + '0000']['name'],
-                "name": c['name'],
-                "id": c['id']
-            }
-            current_city = obj
-            # 跳过国标页面由于 html 结构不同导致省份进入城市 json 数据
-            if not obj['id'] in province_object_d.keys():
-                city_object_d[c['id']] = obj
-                city_d.setdefault(c['id'][0:2] + '0000', []).append(obj)
-                country_d.setdefault(c['id'], [])
-            continue
-
-        if int(c['id']) % 1000 == 0:
-            continue
-
-        area_obj = {
-            "city": current_city['name'],
+    for c in city_json:
+        parent_id = c['id'][0:2] + '0000000000'
+        obj = {
+            "province": province_object_json[parent_id]['name'],
             "name": c['name'],
             "id": c['id']
         }
-        country_object_d[c['id']] = area_obj
-        country_d[current_city['id']].append(area_obj)
+        city_object_d[c['id']] = obj
+        city_d.setdefault(parent_id, []).append(obj)
 
     out_city_object = codecs.open('json/city_object.json', 'w', 'utf-8')
-    out_area_object = codecs.open('json/area_object.json', 'w', 'utf-8')
     out_city = codecs.open('json/city.json', 'w', 'utf-8')
-    out_area = codecs.open('json/area.json', 'w', 'utf-8')
-    out_city_object.write(json.dumps(city_object_d, ensure_ascii=False, indent=4))
+    out_city_object.write(json.dumps(
+        city_object_d, ensure_ascii=False, indent=4))
     out_city.write(json.dumps(city_d, ensure_ascii=False, indent=4))
-    out_area_object.write(json.dumps(country_object_d, ensure_ascii=False, indent=4))
-    out_area.write(json.dumps(country_d, ensure_ascii=False, indent=4))
+
+    country_object_d = OrderedDict()
+    country_d = OrderedDict()
+
+    for c in country_json:
+        parent_id = c['id'][0:4] + '00000000'
+        obj = {
+            "city": city_object_d[parent_id]['name'],
+            "name": c['name'],
+            "id": c['id']
+        }
+        country_object_d[c['id']] = obj
+        country_d.setdefault(parent_id, []).append(obj)
+
+    out_country_object = codecs.open('json/country_object.json', 'w', 'utf-8')
+    out_country = codecs.open('json/country.json', 'w', 'utf-8')
+    out_country_object.write(json.dumps(
+        country_object_d, ensure_ascii=False, indent=4))
+    out_country.write(json.dumps(country_d, ensure_ascii=False, indent=4))
+
+    town_object_d = OrderedDict()
+    town_d = OrderedDict()
+
+    for c in town_json:
+        parent_id = c['id'][0:6] + '000000'
+        obj = {
+            "city": country_object_d[parent_id]['name'],
+            "name": c['name'],
+            "id": c['id']
+        }
+        town_object_d[c['id']] = obj
+        town_d.setdefault(parent_id, []).append(obj)
+
+    out_town_object = codecs.open('json/town_object.json', 'w', 'utf-8')
+    out_town = codecs.open('json/town.json', 'w', 'utf-8')
+    out_town_object.write(json.dumps(
+        town_object_d, ensure_ascii=False, indent=4))
+    out_town.write(json.dumps(town_d, ensure_ascii=False, indent=4))
 
 
 def main():
     pull_data()
-    make_data()
+    # make_data()
 
 
 if __name__ == '__main__':
-    print("please call main")
-    # main()
+    # print("please call main")
+    main()
