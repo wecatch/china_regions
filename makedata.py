@@ -117,24 +117,24 @@ def pull_data():
         town_object_d, ensure_ascii=False, indent=4))
     out_town.write(json.dumps(town_d, ensure_ascii=False, indent=4))
 
-    # village_object_d = OrderedDict()
-    # village_d = OrderedDict()
+    village_object_d = OrderedDict()
+    village_d = OrderedDict()
 
-    # for c in village_json:
-    #     parent_id = c['id'][0:9] + '000'
-    #     obj = {
-    #         "city": town_object_d[parent_id]['name'],
-    #         "name": c['name'],
-    #         "id": c['id']
-    #     }
-    #     village_object_d[c['id']] = obj
-    #     village_d.setdefault(parent_id, []).append(obj)
+    for c in village_json:
+        parent_id = c['id'][0:9] + '000'
+        obj = {
+            "city": town_object_d[parent_id]['name'],
+            "name": c['name'],
+            "id": c['id']
+        }
+        village_object_d[c['id']] = obj
+        village_d.setdefault(parent_id, []).append(obj)
 
-    # out_village_object = codecs.open('json/village_object.json', 'w', 'utf-8')
-    # out_village = codecs.open('json/village.json', 'w', 'utf-8')
-    # out_village_object.write(json.dumps(
-    #     village_object_d, ensure_ascii=False, indent=4))
-    # out_village.write(json.dumps(village_d, ensure_ascii=False, indent=4))
+    out_village_object = codecs.open('json/village_object.json', 'w', 'utf-8')
+    out_village = codecs.open('json/village.json', 'w', 'utf-8')
+    out_village_object.write(json.dumps(
+        village_object_d, ensure_ascii=False, indent=4))
+    out_village.write(json.dumps(village_d, ensure_ascii=False, indent=4))
 
 
 def main():
@@ -143,5 +143,4 @@ def main():
 
 
 if __name__ == '__main__':
-    print("please call main")
-    # main()
+    main()
