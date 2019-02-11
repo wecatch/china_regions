@@ -2,7 +2,7 @@
 
 最全最新中国省，市，地区 json 及 sql 数据，自动抓取国标 http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/ 数据，并且自动生成 JavaScript es6 module 以及 sql 数据。
 
-最新国标行政区规划最低到居委会这一级别了，行政区代码代码也变长了，而且不包含港澳台信息，按需所需不同的版本，见 https://github.com/wecatch/china_regions/releases
+最新国标行政区规划最低到居委会这一级别了，行政区代码代码也变长了，不包含港澳台信息，按需所需不同的版本，见 https://github.com/wecatch/china_regions/releases
 
 ## 演示地址
 
@@ -41,7 +41,7 @@ http://wecatch.me/china_regions/
 
 4. 打开 main.js 文件，取消对 main 函数执行的注释，开始执行 `node main.js`，一般情况下可以顺利爬取到 province、
 city、country 的信息
-5. 利用已经爬取的 province、city、country 开始同步其他行政区域的信息，注释掉 main 函数根据需要分别打开 pullCountryDataSync、pullTownDataSync、pullVillageDataSync 爬取其他行政区域的信息，注释事项见函数注释
+5. 利用已经爬取的 province、city、country 开始同步其他行政区域的信息，注释掉 main 函数根据需要分别打开 pullTownDataSync、pullVillageDataSync 爬取其他行政区域的信息，注释事项见函数注释
 6. 最后执行 `python makedata.py` 生成各种格式文件
 
 ## 注意事项
@@ -50,7 +50,11 @@ city、country 的信息
 
 行政级别顺序是:province-> city --> country --> town --> village，对应的是:省->市(市辖区)->县(区、市)->镇(街道)->村(居委会)
 
-爬取 village 时由于数据量特别大会导致 nodejs 出现内存泄漏的情况，所以每次增量更新文件时会自动进行文件备份，生成 `src/village_backup.json` 备份文件不进仓库，最后再手动干预偏移量，总共有 4 万多镇级别，爬取的村级别有几十万
+爬取 village 时由于数据量特别大会导致 nodejs 出现内存泄漏的情况，所以每次增量更新文件时会自动进行文件备份，生成 `src/village_backup.json` 备份文件不进仓库，最后再手动干预偏移量
+
+village 的数据文件是压缩过的解压执行 `tar xvfz village.tar.gz .`
+
+默认情况下不生成 village 这个级别的数据，如果需要在执行 `makedata.py` 时打开相应的注释即可
 
 
 ## 反馈

@@ -331,7 +331,7 @@ function pullCountryDataSync() {
                 encoding: null
             }, function(error, response, body) {
                 //空的文件内容必须是 []
-                urls = JSON.parse(fs.readFileSync(countryPath));
+                urls = JSON.parse(fs.readFileSync(countryPath) || []);
                 urls = urls.concat(parseCountry(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
                 fs.writeFileSync(countryPath, JSON.stringify(urls));
                 log.debug('foreach ==> ', offset + index);
@@ -354,7 +354,7 @@ function pullTownDataSync() {
                 encoding: null
             }, function(error, response, body) {
                 //空的文件内容必须是 []
-                urls = JSON.parse(fs.readFileSync(townPath));
+                urls = JSON.parse(fs.readFileSync(townPath) || []);
                 urls = urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
                 fs.writeFileSync(townPath, JSON.stringify(urls));
                 log.debug('foreach ==> ', offset + index);
@@ -382,7 +382,7 @@ function pullVillageDataSync() {
                 encoding: null
             }, function(error, response, body) {
                 //空的文件内容必须是 []
-                urls = JSON.parse(fs.readFileSync(villagePath));
+                urls = JSON.parse(fs.readFileSync(villagePath) || []);
                 urls = urls.concat(parseVillage(iconv.decode(body, 'gb2312')));
                 fs.writeFileSync(villagePath, JSON.stringify(urls));
                 log.debug('foreach ==> ', offset + index);
@@ -391,16 +391,6 @@ function pullVillageDataSync() {
         }
     });
 }
-
-
-// function pullTownDataAsync() {
-//     Promise.all(JSON.parse(fs.readFileSync(countryPath)).filter(x => x.url.length > 0).map(x => newRequestPromise(x.url))).then(function(respResults) {
-//         let urls = [];
-//         respResults.forEach(function(item, index) {
-//             urls = urls.concat(parseTown(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href)));
-//         });
-//     });
-// }
 
 
 // main();
