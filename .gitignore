@@ -57,3 +57,7 @@ docs/_build/
 target/
 .DS_Store
 src/village_backup.json
+js/village*.js
+json/village*.json
+mysql/village*.sql
+src/village.json
