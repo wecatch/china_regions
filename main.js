@@ -342,8 +342,6 @@ function pullCountryDataSync() {
 }
 
 
-//由于数据量很大，统计局的服务器在接受大量连接时会莫名 hang 住，所以通过输出 index，不断计算偏移量，方便下一次计算
-//第一次从 0 开始，假如输出 index 是 3000，则下一次爬取时偏移量应该是 3001，可以通过 sleep 适当控制爬取的速度，sleep 是直接让 nodejs event loop 停住
 function pullTownDataSync() {
     let offset = 0
     JSON.parse(fs.readFileSync(countryPath)).slice(offset).forEach(function(element, index) {
@@ -366,9 +364,12 @@ function pullTownDataSync() {
     });
 }
 
+//由于数据量很大，统计局的服务器在接受大量连接时会莫名 hang 住，所以通过输出 index，不断计算偏移量，方便下一次计算
+//第一次从 0 开始，假如输出 index 是 3000，则下一次爬取时偏移量应该是 3001，可以通过 sleep 适当控制爬取的速度，sleep 是直接让 nodejs event loop 停住
 function pullVillageDataSync() {
     let offset = 0
     JSON.parse(fs.readFileSync(townPath)).slice(offset).forEach(function(element, index) {
+        // 该异常用于矫正偏移量的正确性
         // log.debug(element)
         // throw Error("offset error");
         fs.copyFileSync(villagePath, villagePathBackup)

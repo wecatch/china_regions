@@ -40,6 +40,7 @@ def make_data():
             out_mysql.write(mysql_data)
 
 
+
 def pull_data():
     province_object_d = json.loads(
         codecs.open('json/province_object.json', 'r', 'utf-8').read())
@@ -48,8 +49,8 @@ def pull_data():
     index = 0
     city_object_d = OrderedDict()
     city_d = OrderedDict()
-    area_object_d = OrderedDict()
-    area_d = OrderedDict()
+    country_object_d = OrderedDict()
+    country_d = OrderedDict()
     current_city = {}
     for c in c_json:
         if int(c['id']) % 100 == 0:
@@ -64,7 +65,7 @@ def pull_data():
             if not obj['id'] in province_object_d.keys():
                 city_object_d[c['id']] = obj
                 city_d.setdefault(c['id'][0:2] + '0000', []).append(obj)
-                area_d.setdefault(c['id'], [])
+                country_d.setdefault(c['id'], [])
             continue
 
         if int(c['id']) % 1000 == 0:
@@ -75,8 +76,8 @@ def pull_data():
             "name": c['name'],
             "id": c['id']
         }
-        area_object_d[c['id']] = area_obj
-        area_d[current_city['id']].append(area_obj)
+        country_object_d[c['id']] = area_obj
+        country_d[current_city['id']].append(area_obj)
 
     out_city_object = codecs.open('json/city_object.json', 'w', 'utf-8')
     out_area_object = codecs.open('json/area_object.json', 'w', 'utf-8')
@@ -84,8 +85,8 @@ def pull_data():
     out_area = codecs.open('json/area.json', 'w', 'utf-8')
     out_city_object.write(json.dumps(city_object_d, ensure_ascii=False, indent=4))
     out_city.write(json.dumps(city_d, ensure_ascii=False, indent=4))
-    out_area_object.write(json.dumps(area_object_d, ensure_ascii=False, indent=4))
-    out_area.write(json.dumps(area_d, ensure_ascii=False, indent=4))
+    out_area_object.write(json.dumps(country_object_d, ensure_ascii=False, indent=4))
+    out_area.write(json.dumps(country_d, ensure_ascii=False, indent=4))
 
 
 def main():

@@ -13,6 +13,7 @@ http://wecatch.me/china_regions/
 数据分 json、es6 module、sql 三种格式存储，es6 module 和 sql 是根据 json 自动生成，json 数据又是根据最新国标生成，
 
 ```
+├── js              # js module 格式
 ├── json            # json 格式
 ├── mysql           # mysql sql 格式
 ├── postgresql      # postgresql 格式
@@ -41,7 +42,15 @@ http://wecatch.me/china_regions/
 4. 打开 main.js 文件，取消对 main 函数执行的注释，开始执行 `node main.js`，一般情况下可以顺利爬取到 province、
 city、country 的信息
 5. 利用已经爬取的 province、city、country 开始同步其他行政区域的信息，注释掉 main 函数根据需要分别打开 pullCountryDataSync、pullTownDataSync、pullVillageDataSync 爬取其他行政区域的信息，注释事项见函数注释
-5. 最后执行 `python makedata.py` 生成各种格式文件
+6. 最后执行 `python makedata.py` 生成各种格式文件
+
+## 注意事项
+
+根据 town 爬取的 village 数据非常大，默认情况下不会自动生成 village 的信息，可以根据自己的需要 clone 仓库之后自己生成
+
+行政级别顺序是:province-> city --> country --> town --> village，对应的是:省->市(市辖区)->县(区、市)->镇(街道)->村(居委会)
+
+爬取 village 时由于数据量特别大会导致 nodejs 出现内存泄漏的情况，所以每次增量更新文件时会自动进行文件备份，生成 `src/village_backup.json` 备份文件不进仓库，最后再手动干预偏移量，总共有 4 万多镇级别，爬取的村级别有几十万
 
 
 ## 反馈
