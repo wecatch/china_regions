@@ -22,7 +22,7 @@ http://wecatch.me/china_regions/
 直接拷贝 json 和 es6 文件可直接使用，也可以根据对应的语言生成不同的模块。
 
 
-Village 数据文件特别大，可以 clone 仓库，在 src 中解压 village 的压缩文件，然后执行 `python makedata.py`
+Village 数据文件特别大，默认不包含在仓库中，可以 clone 仓库，在 src 中解压 village 的压缩文件，然后执行 `python makedata.py`
 
 
 ## 如何更新到最新国标
