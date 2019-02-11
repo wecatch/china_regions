@@ -72,3 +72,4 @@ village 的数据文件是压缩过的解压执行 `tar xvfz village.tar.gz .`
 
 - 更新数据抓取方式，使用 nodejs 抓取
 - 更新数据到最新的 2018 国标
+- 移除对 sqlite 以及 postgresql 的
