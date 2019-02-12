@@ -1,6 +1,6 @@
 # china_regions
 
-最全最新中国省，市，地区 json 及 sql 数据，自动抓取国标 http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/ 数据，并且自动生成 JavaScript es6 module 以及 sql 数据。
+最全最新中国省，市，地区 json 及 sql 数据，自动抓取国标 http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/ 数据，并且自动生成 JavaScript es6 module 以及 sql 数据。
 
 最新国标行政区规划最低到居委会这一级别了，行政区代码代码也变长了，不包含港澳台信息，按需所需不同的版本，见 https://github.com/wecatch/china_regions/releases
 
@@ -57,7 +57,7 @@ city、country 的信息
 
 village 的数据文件是压缩过的解压执行 `tar xvfz village.tar.gz .`
 
-默认情况下不生成 village 这个级别的数据，如果需要在执行 `makedata.py` 时打开相应的注释即可
+默认情况下不生成 village 这个级别的数据，如果需要请执行 `makedata.py` 
 
 
 ## 反馈
