@@ -13,43 +13,55 @@ def make_data():
         out_js = codecs.open('js/%s.js' % k, 'w', 'utf-8')
         out_js.write(js_data)
         json_data = json.loads(data)
-        mysql_data = ''
+        mysql_data_list = []
 
         if k == 'province':
             for index, i in enumerate(json_data):
-                mysql_data += "INSERT INTO province VALUES ('%s', '%s', '%s');\n" % (index + 1, i['name'], i['id'])  # noqa
+                mysql_data = "INSERT INTO province VALUES ('%s', '%s', '%s');\n" % (index + 1, i['name'], i['id'])  # noqa
+                mysql_data_list.append(mysql_data)
 
         if k == 'city':
             index = 0
             for province_id in sorted(json_data.keys()):
                 for city in json_data[province_id]:
                     index += 1
-                    mysql_data += "INSERT INTO city VALUES ('%s', '%s', '%s', '%s');\n" % (index, city['name'], city['id'], province_id)  # noqa
+                    mysql_data = "INSERT INTO city VALUES ('%s', '%s', '%s', '%s');\n" % (index, city['name'], city['id'], province_id)  # noqa
+                    mysql_data_list.append(mysql_data)
 
         if k == 'country':
             index = 0
             for city_id in sorted(json_data.keys()):
                 for country in json_data[city_id]:
                     index += 1
-                    mysql_data += "INSERT INTO country  VALUES ('%s', '%s', '%s', '%s');\n" % (index, country['name'], country['id'], city_id)  # noqa
+                    mysql_data = "INSERT INTO country  VALUES ('%s', '%s', '%s', '%s');\n" % (index, country['name'], country['id'], city_id)  # noqa
+                    mysql_data_list.append(mysql_data)
 
         if k == 'town':
             index = 0
             for country_id in sorted(json_data.keys()):
                 for town in json_data[country_id]:
                     index += 1
-                    mysql_data += "INSERT INTO town VALUES ('%s', '%s', '%s', '%s');\n" % (index, town['name'], town['id'], country_id)  # noqa
+                    mysql_data = "INSERT INTO town VALUES ('%s', '%s', '%s', '%s');\n" % (index, town['name'], town['id'], country_id)  # noqa
+                    mysql_data_list.append(mysql_data)
 
         if k == 'village':
             index = 0
             for town_id in sorted(json_data.keys()):
                 for village in json_data[town_id]:
                     index += 1
-                    mysql_data += "INSERT INTO village VALUES ('%s', '%s', '%s', '%s');\n" % (index, village['name'], village['id'], town_id)  # noqa
+                    mysql_data = "INSERT INTO village VALUES ('%s', '%s', '%s', '%s');\n" % (index, village['name'], village['id'], town_id)  # noqa
+                    mysql_data_list.append(mysql_data)
 
         if k in ['province', 'city', 'country', 'town', 'village']:
             out_mysql = codecs.open('mysql/%s.sql' % k, 'w', 'utf-8')
-            out_mysql.write(mysql_data)
+            index = 0
+            start = 0
+            while start < len(mysql_data_list):
+                end = start + 1000
+                out_mysql.write(''.join(mysql_data_list[start:end]))
+                start = end
+
+            out_mysql.close()
 
 
 def pull_data():
