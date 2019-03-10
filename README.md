@@ -16,7 +16,6 @@ http://wecatch.me/china_regions/
 ├── js              # js module 格式
 ├── json            # json 格式
 ├── mysql           # mysql sql 格式
-├── postgresql      # postgresql 格式
 ```
 
 直接拷贝 json 和 es6 文件可直接使用，也可以根据对应的语言生成不同的模块。
@@ -67,6 +66,10 @@ village 的数据文件是压缩过的解压执行 `tar xvfz village.tar.gz .`
 
 ## 更新记录
 
+## 2019.3.10
+
+- 更新数据生成的方式
+- 校验数据生成是否准确 `cat src/village.json | grep id | wc -l` == `wc -l mysql/village.sql`
 
 ## 2019.2.11
 
