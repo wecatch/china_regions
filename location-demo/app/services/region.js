@@ -1,21 +1,21 @@
 import Ember from 'ember';
-import { area } from '../regions/area';
+import { country } from '../regions/country';
 import { province } from '../regions/province';
 import { city } from '../regions/city';
 
-import { area_object } from '../regions/area_object';
+import { country_object } from '../regions/country_object';
 import { province_object } from '../regions/province_object';
 import { city_object } from '../regions/city_object';
 
 export default Ember.Service.extend({
     provinceOptions: province,
     cityOptions: city,
-    areaOptions: area,
+    areaOptions: country,
     getCity(provinceId){
         return provinceId ? city[provinceId] : []
     },
     getArea(cityId){
-        return cityId ? area[cityId] : [];
+        return cityId ? country[cityId] : [];
     },
     getProvinceObject(id){
         return province_object[id] || '';
@@ -24,6 +24,6 @@ export default Ember.Service.extend({
         return city_object[id] || '';
     },
     getAreaObject(id){
-        return area_object[id] || '';
+        return country_object[id] || '';
     },
 });

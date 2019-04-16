@@ -1,8 +1,9 @@
-import Ember from 'ember';
+import { computed, observer, getWithDefault } from '@ember/object';
+import Component from '@ember/component';
+import { inject } from '@ember/service';
+import EmberObject from '@ember/object';
 
-const {computed, observer, getWithDefault} = Ember
-
-export default Ember.Component.extend({
+export default Component.extend({
     actions: {
         resetSearch(){
             this.searchOptions.setProperties({
@@ -12,7 +13,7 @@ export default Ember.Component.extend({
             });
         }
     },
-    region: Ember.inject.service(),
+    region: inject(),
     provinceOptions: computed.alias('region.provinceOptions'),
     province: computed('searchOptions.province_id', {
         get(){
@@ -32,8 +33,8 @@ export default Ember.Component.extend({
             return this.get('region').getAreaObject(id);
         }
     }),
-    cityOptions: [],
-    areaOptions: [],
+    cityOptions: null,
+    areaOptions: null,
     provinceChange: observer('searchOptions.province_id', function() {
         let provinceId = this.get('searchOptions.province_id')
         this.set('cityOptions', this.get('region').getCity(provinceId));
@@ -60,7 +61,9 @@ export default Ember.Component.extend({
     init(){
         this._super(...arguments);
         this.initRegion();
-        this.set('searchOptions', Ember.Object.create({
+        this.set('cityOptions', []);
+        this.set('areaOptions', []);
+        this.set('searchOptions', EmberObject.create({
             province_id: '',
             city_id: '',
             area_id: '',
