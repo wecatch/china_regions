@@ -71,29 +71,31 @@ function newRequestPromise(url) {
 }
 
 
-const provincePath = 'src/province.json';
-const cityPath = 'src/city.json';
-const countryPath = 'src/country.json';
-const townPath = 'src/town.json';
-const villagePath = 'src/village.json';
-const villagePathBackup = 'src/village_backup.json';
+const ProvincePath = 'src/province.json';
+const CityPath = 'src/city.json';
+const CountryPath = 'src/country.json';
+const TownPath = 'src/town.json';
+const VillagePath = 'src/village.json';
+const VillagePathBackup = 'src/village_backup.json';
+const SpecialCityPath = 'src/special_city.json';
 
 const fileExists = {}
-fileExists.provincePath = fs.existsSync(provincePath);
-fileExists.cityPath = fs.existsSync(cityPath);
-fileExists.countryPath = fs.existsSync(countryPath);
-fileExists.townPath = fs.existsSync(townPath);
-fileExists.villagePath = fs.existsSync(villagePath);
+fileExists.provincePath = fs.existsSync(ProvincePath);
+fileExists.cityPath = fs.existsSync(CityPath);
+fileExists.countryPath = fs.existsSync(CountryPath);
+fileExists.townPath = fs.existsSync(TownPath);
+fileExists.villagePath = fs.existsSync(VillagePath);
 
 
 function requestProvince() {
     // request provice
     if (fileExists.provincePath){
         return new Promise(function(resolve, reject){
-            resolve(JSON.parse(fs.readFileSync(provincePath)));
+            resolve(JSON.parse(fs.readFileSync(ProvincePath)));
         });
     }else {
         return newRequestPromise(host).spread(function(response, body) {
+            log.info("正在请求 => 省份")
             return parseProvice(iconv.decode(body, 'gb2312'));
         })
     }
@@ -106,10 +108,11 @@ function main(){
     //由于从 country 开始信息量已经很大了，一般服务器会直接报错 可以使用 pullTownDataSync 从本地文件读取 country 信息继续爬
     requestProvince().then(function(proviceResult) {
         // request city
-        fs.writeFileSync(provincePath, JSON.stringify(proviceResult));
+        fs.writeFileSync(ProvincePath, JSON.stringify(proviceResult));
         if (fileExists.cityPath) {
-            return JSON.parse(fs.readFileSync(cityPath))
+            return JSON.parse(fs.readFileSync(CityPath))
         } else {
+            log.info("正在请求 => 城市")
             return Promise.all(proviceResult.map(function(item) {
                 return newRequestPromise(item.url);
             }));
@@ -120,7 +123,7 @@ function main(){
             respResults.forEach(function(item, index) {
                 urls = urls.concat(parseCity(iconv.decode(item[1], 'gb2312'), host));
             })
-            fs.writeFileSync(cityPath, JSON.stringify(urls));
+            fs.writeFileSync(CityPath, JSON.stringify(urls));
         } else {
             //已经存在表示已经爬取到了 city 信息
             urls = respResults;
@@ -128,9 +131,10 @@ function main(){
 
         // 已经存在 country 信息
         if (fileExists.countryPath) {
-            return JSON.parse(fs.readFileSync(countryPath));
+            return JSON.parse(fs.readFileSync(CountryPath));
         } else {
             // request country
+            log.info("正在请求 => 区县")
             return Promise.all(urls.filter(x => x.url.length > 0).map(function(item) {
                 return newRequestPromise(item.url);
             }))
@@ -142,7 +146,7 @@ function main(){
             respResults.forEach(function(item, index) {
                 urls = urls.concat(parseCountry(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href)));
             });
-            fs.writeFileSync(countryPath, JSON.stringify(urls));
+            fs.writeFileSync(CountryPath, JSON.stringify(urls));
         } else {
             //已经存在表示已经爬取到了 country 信息
             urls = respResults;
@@ -150,9 +154,10 @@ function main(){
 
         // 已经存在 town 信息
         if (fileExists.townPath) {
-            return JSON.parse(fs.readFileSync(townPath));
+            return JSON.parse(fs.readFileSync(TownPath));
         } else {
             // request town
+            log.info("正在请求 => 乡镇")
             return Promise.all(urls.filter(x => x.url.length > 0).map(function(item) {
                 return newRequestPromise(item.url);
             }))
@@ -164,15 +169,16 @@ function main(){
                 urls = urls.concat(parseTown(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href)));
             });
 
-            fs.writeFileSync(townPath, JSON.stringify(urls));
+            fs.writeFileSync(TownPath, JSON.stringify(urls));
         } else {
             urls = respResults;
         }
 
         if (fileExists.villagePath) {
-            return JSON.parse(fs.readFileSync(villagePath))
+            return JSON.parse(fs.readFileSync(VillagePath))
         } else {
             // request village
+            log.info("正在请求 => 村 街道 居委会")
             return Promise.all(urls.filter(x => x.url.length > 0).map(function(item) {
                 return newRequestPromise(item.url);
             }))
@@ -183,7 +189,7 @@ function main(){
             respResults.forEach(function(item, index) {
                 urls = urls.concat(parseVillage(iconv.decode(item[1], 'gb2312')));
             });
-            fs.writeFileSync('src/village.json', JSON.stringify(urls));
+            fs.writeFileSync(VillagePath, JSON.stringify(urls));
         }
 
     }).catch(function(error) {
@@ -319,21 +325,30 @@ function parseVillage(html) {
 }
 
 
-function pullCountryDataSync() {
-    let offset = 0
-    JSON.parse(fs.readFileSync(cityPath)).slice(offset).forEach(function(element, index) {
+function pullCountryDataSync(cityPath, offset) {
+    offset = offset || 0
+    let data = fs.readFileSync(cityPath);
+    let jsonData = JSON.parse(data);
+    jsonData.slice(offset).forEach(function(element, index) {
         let urls = [];
         let url = element.url.replace('www.stats.gov.cn', IP);
-        log.debug(url);
+        log.debug("正在请求 => " + element.name + " => "+ element.url);
         if (url){
             requestSync({
                 url: url,
                 encoding: null
             }, function(error, response, body) {
                 //空的文件内容必须是 []
-                urls = JSON.parse(fs.readFileSync(countryPath) || []);
-                urls = urls.concat(parseCountry(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
-                fs.writeFileSync(countryPath, JSON.stringify(urls));
+                //特殊处理东莞市
+                if(["441900000000", "442000000000", "460400000000"].includes(element.id)){
+                    urls = JSON.parse(fs.readFileSync(TownPath) || []);
+                    urls = urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
+                    fs.writeFileSync(TownPath, JSON.stringify(urls));
+                } else {
+                    urls = JSON.parse(fs.readFileSync(CountryPath) || []);
+                    urls = urls.concat(parseCountry(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
+                    fs.writeFileSync(CountryPath, JSON.stringify(urls));    
+                }
                 log.debug('foreach ==> ', offset + index);
             });
             sleep(500);
@@ -342,21 +357,25 @@ function pullCountryDataSync() {
 }
 
 
-function pullTownDataSync() {
-    let offset = 0
-    JSON.parse(fs.readFileSync(countryPath)).slice(offset).forEach(function(element, index) {
+
+
+function pullTownDataSync(countryPath, offset) {
+    offset = offset || 0
+    let data = fs.readFileSync(countryPath);
+    let jsonData = JSON.parse(data);
+    jsonData.slice(offset).forEach(function(element, index) {
         let urls = [];
         let url = element.url.replace('www.stats.gov.cn', IP);
-        log.debug(url);
+        log.debug("正在请求 => " + element.name + " => "+ element.url);
         if (url){
             requestSync({
                 url: url,
                 encoding: null
             }, function(error, response, body) {
                 //空的文件内容必须是 []
-                urls = JSON.parse(fs.readFileSync(townPath) || []);
+                urls = JSON.parse(fs.readFileSync(TownPath) || []);
                 urls = urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
-                fs.writeFileSync(townPath, JSON.stringify(urls));
+                fs.writeFileSync(TownPath, JSON.stringify(urls));
                 log.debug('foreach ==> ', offset + index);
             });
             sleep(500);
@@ -366,34 +385,38 @@ function pullTownDataSync() {
 
 //由于数据量很大，统计局的服务器在接受大量连接时会莫名 hang 住，所以通过输出 index，不断计算偏移量，方便下一次计算
 //第一次从 0 开始，假如输出 index 是 3000，则下一次爬取时偏移量应该是 3001，可以通过 sleep 适当控制爬取的速度，sleep 是直接让 nodejs event loop 停住
-function pullVillageDataSync() {
-    let offset = 0
-    JSON.parse(fs.readFileSync(townPath)).slice(offset).forEach(function(element, index) {
+function pullVillageDataSync(townPath, offset) {
+    offset = offset || 0
+    let data = fs.readFileSync(townPath);
+    let jsonData = JSON.parse(data);
+    // log.debug(jsonData.slice(offset))
+    jsonData.slice(offset).forEach(function(element, index) {
         // 该异常用于矫正偏移量的正确性
         // log.debug(element)
         // throw Error("offset error");
-        fs.copyFileSync(villagePath, villagePathBackup)
+        fs.copyFileSync(VillagePath, VillagePathBackup)
         let urls = [];
-        let url = element.url.replace('www.stats.gov.cn', IP);
-        log.debug(element)
+        // let url = element.url.replace('www.stats.gov.cn', IP);
+        let url = element.url;
+        log.debug("正在请求 => " + element.name + " => "+ element.url);
         if (url){
             requestSync({
                 url: url,
                 encoding: null
             }, function(error, response, body) {
                 //空的文件内容必须是 []
-                urls = JSON.parse(fs.readFileSync(villagePath) || []);
+                urls = JSON.parse(fs.readFileSync(VillagePath) || []);
                 urls = urls.concat(parseVillage(iconv.decode(body, 'gb2312')));
-                fs.writeFileSync(villagePath, JSON.stringify(urls));
+                fs.writeFileSync(VillagePath, JSON.stringify(urls));
                 log.debug('foreach ==> ', offset + index);
             });
-            sleep(500);
+            sleep(5000);
         }
     });
 }
 
 
 // main();
-// pullCountryDataSync();
-// pullTownDataSync();
-// pullVillageDataSync()
+// pullCountryDataSync(CityPath, 0);
+// pullTownDataSync(CountryPath, 0);
+pullVillageDataSync(TownPath, 43302); //43302
