@@ -73,6 +73,8 @@ def pull_data():
     town_json = json.loads(codecs.open('src/town.json', 'r', 'utf-8').read())
     village_json = json.loads(codecs.open(
         'src/village.json', 'r', 'utf-8').read())
+    special_city_json = json.loads(codecs.open(
+        'src/special_city.json', 'r', 'utf-8').read())
     city_object_d = OrderedDict()
     city_d = OrderedDict()
     for c in city_json:
@@ -93,6 +95,9 @@ def pull_data():
 
     country_object_d = OrderedDict()
     country_d = OrderedDict()
+    special_city_object = OrderedDict()
+    for sc in special_city_json:
+        special_city_object[sc["id"]] = sc
 
     for c in country_json:
         parent_id = c['id'][0:4] + '00000000'
@@ -115,11 +120,19 @@ def pull_data():
 
     for c in town_json:
         parent_id = c['id'][0:6] + '000000'
-        obj = {
-            "city": country_object_d[parent_id]['name'],
-            "name": c['name'],
-            "id": c['id']
-        }
+        # 特殊处理不带区的市
+        if parent_id in special_city_object:
+            obj = {
+                "city": city_object_d[parent_id]['name'],
+                "name": c['name'],
+                "id": c['id']
+            }
+        else:
+            obj = {
+                "city": country_object_d[parent_id]['name'],
+                "name": c['name'],
+                "id": c['id']
+            }
         town_object_d[c['id']] = obj
         town_d.setdefault(parent_id, []).append(obj)
 
