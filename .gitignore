@@ -62,3 +62,4 @@ json/village*.json
 mysql/village*.sql
 src/village.json
 node_modules
+.vscode/
