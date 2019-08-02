@@ -69,7 +69,7 @@ village 的数据文件是压缩过的解压执行 `tar xvfz village.tar.gz .`
 ## 2019.4.17
 
 fix [#17](https://github.com/wecatch/china_regions/issues/17) 针对东莞市 中山市 儋州市三个不设区的市单独处理，
-这三个市没有区，直接到镇，镇的上一级就是市，开发者可以根据自己的情况特殊处理，详见 `src/special_city.json`
+这三个市没有区，直接到镇 town，镇的上一级就是市，开发者可以根据自己的情况特殊处理，详见 `src/special_city.json`，SQL 数据包含在 town.sql 中
 
 ## 2019.4.9
 
