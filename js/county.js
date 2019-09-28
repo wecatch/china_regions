@@ -1,4 +1,4 @@
-let country = {
+let county = {
     "110100000000": [
         {
             "city": "市辖区", 
@@ -17090,4 +17090,4 @@ let country = {
         }
     ]
 }
-export {country} 
+export {county} 

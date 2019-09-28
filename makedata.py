@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 def make_data():
     source_file_list = [
-        'village', 'village_object', 'town', 'town_object', 'country', 'country_object', 'city', 'city_object', 'province', 'province_object']
+        'village', 'village_object', 'town', 'town_object', 'county', 'county_object', 'city', 'city_object', 'province', 'province_object']
     for k in reversed(source_file_list):
         data = codecs.open('json/%s.json' % k, 'r', 'utf-8').read()
         js_data = 'let %s = ' % k + data + '\nexport {%s} ' % k
@@ -28,20 +28,20 @@ def make_data():
                     mysql_data = "INSERT INTO city VALUES ('%s', '%s', '%s', '%s');\n" % (index, city['name'], city['id'], province_id)  # noqa
                     mysql_data_list.append(mysql_data)
 
-        if k == 'country':
+        if k == 'county':
             index = 0
             for city_id in sorted(json_data.keys()):
-                for country in json_data[city_id]:
+                for county in json_data[city_id]:
                     index += 1
-                    mysql_data = "INSERT INTO country  VALUES ('%s', '%s', '%s', '%s');\n" % (index, country['name'], country['id'], city_id)  # noqa
+                    mysql_data = "INSERT INTO county  VALUES ('%s', '%s', '%s', '%s');\n" % (index, county['name'], county['id'], city_id)  # noqa
                     mysql_data_list.append(mysql_data)
 
         if k == 'town':
             index = 0
-            for country_id in sorted(json_data.keys()):
-                for town in json_data[country_id]:
+            for county_id in sorted(json_data.keys()):
+                for town in json_data[county_id]:
                     index += 1
-                    mysql_data = "INSERT INTO town VALUES ('%s', '%s', '%s', '%s');\n" % (index, town['name'], town['id'], country_id)  # noqa
+                    mysql_data = "INSERT INTO town VALUES ('%s', '%s', '%s', '%s');\n" % (index, town['name'], town['id'], county_id)  # noqa
                     mysql_data_list.append(mysql_data)
 
         if k == 'village':
@@ -52,7 +52,7 @@ def make_data():
                     mysql_data = "INSERT INTO village VALUES ('%s', '%s', '%s', '%s');\n" % (index, village['name'], village['id'], town_id)  # noqa
                     mysql_data_list.append(mysql_data)
 
-        if k in ['province', 'city', 'country', 'town', 'village']:
+        if k in ['province', 'city', 'county', 'town', 'village']:
             out_mysql = codecs.open('mysql/%s.sql' % k, 'w', 'utf-8')
             index = 0
             start = 0
@@ -68,8 +68,8 @@ def pull_data():
     province_object_json = json.loads(
         codecs.open('json/province_object.json', 'r', 'utf-8').read())
     city_json = json.loads(codecs.open('src/city.json', 'r', 'utf-8').read())
-    country_json = json.loads(codecs.open(
-        'src/country.json', 'r', 'utf-8').read())
+    county_json = json.loads(codecs.open(
+        'src/county.json', 'r', 'utf-8').read())
     town_json = json.loads(codecs.open('src/town.json', 'r', 'utf-8').read())
     village_json = json.loads(codecs.open(
         'src/village.json', 'r', 'utf-8').read())
@@ -93,27 +93,27 @@ def pull_data():
         city_object_d, ensure_ascii=False, indent=4))
     out_city.write(json.dumps(city_d, ensure_ascii=False, indent=4))
 
-    country_object_d = OrderedDict()
-    country_d = OrderedDict()
+    county_object_d = OrderedDict()
+    county_d = OrderedDict()
     special_city_object = OrderedDict()
     for sc in special_city_json:
         special_city_object[sc["id"]] = sc
 
-    for c in country_json:
+    for c in county_json:
         parent_id = c['id'][0:4] + '00000000'
         obj = {
             "city": city_object_d[parent_id]['name'],
             "name": c['name'],
             "id": c['id']
         }
-        country_object_d[c['id']] = obj
-        country_d.setdefault(parent_id, []).append(obj)
+        county_object_d[c['id']] = obj
+        county_d.setdefault(parent_id, []).append(obj)
 
-    out_country_object = codecs.open('json/country_object.json', 'w', 'utf-8')
-    out_country = codecs.open('json/country.json', 'w', 'utf-8')
-    out_country_object.write(json.dumps(
-        country_object_d, ensure_ascii=False, indent=4))
-    out_country.write(json.dumps(country_d, ensure_ascii=False, indent=4))
+    out_county_object = codecs.open('json/county_object.json', 'w', 'utf-8')
+    out_county = codecs.open('json/county.json', 'w', 'utf-8')
+    out_county_object.write(json.dumps(
+        county_object_d, ensure_ascii=False, indent=4))
+    out_county.write(json.dumps(county_d, ensure_ascii=False, indent=4))
 
     town_object_d = OrderedDict()
     town_d = OrderedDict()
@@ -129,7 +129,7 @@ def pull_data():
             }
         else:
             obj = {
-                "city": country_object_d[parent_id]['name'],
+                "city": county_object_d[parent_id]['name'],
                 "name": c['name'],
                 "id": c['id']
             }

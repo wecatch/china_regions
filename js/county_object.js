@@ -1,4 +1,4 @@
-let country_object = {
+let county_object = {
     "110101000000": {
         "city": "市辖区", 
         "name": "东城区", 
@@ -16410,4 +16410,4 @@ let country_object = {
         "id": "659006000000"
     }
 }
-export {country_object} 
+export {county_object} 

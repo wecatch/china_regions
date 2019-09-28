@@ -20,11 +20,11 @@ CREATE TABLE city (
 );
 
 
-DROP TABLE IF EXISTS country;
-CREATE TABLE country (
+DROP TABLE IF EXISTS county;
+CREATE TABLE county (
   _id  int,
   name varchar(64),
-  country_id varchar(12),
+  county_id varchar(12),
   city_id varchar(12),
   PRIMARY KEY (_id)
 );
@@ -35,7 +35,7 @@ CREATE TABLE town (
   _id  int,
   name varchar(64),
   town_id varchar(12),
-  country_id varchar(12),
+  county_id varchar(12),
   PRIMARY KEY (_id)
 );
 

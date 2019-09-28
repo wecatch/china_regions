@@ -73,7 +73,7 @@ function newRequestPromise(url) {
 
 const ProvincePath = 'src/province.json';
 const CityPath = 'src/city.json';
-const CountryPath = 'src/country.json';
+const CountyPath = 'src/county.json';
 const TownPath = 'src/town.json';
 const VillagePath = 'src/village.json';
 const VillagePathBackup = 'src/village_backup.json';
@@ -82,7 +82,7 @@ const SpecialCityPath = 'src/special_city.json';
 const fileExists = {}
 fileExists.provincePath = fs.existsSync(ProvincePath);
 fileExists.cityPath = fs.existsSync(CityPath);
-fileExists.countryPath = fs.existsSync(CountryPath);
+fileExists.countyPath = fs.existsSync(CountyPath);
 fileExists.townPath = fs.existsSync(TownPath);
 fileExists.villagePath = fs.existsSync(VillagePath);
 
@@ -103,9 +103,9 @@ function requestProvince() {
 }
 
 function main(){
-    //从省份开始爬取 有统计局的网站并发能力有限，使用 promise.All 爬完 country 级别的信息时服务器就连接不上了
+    //从省份开始爬取 有统计局的网站并发能力有限，使用 promise.All 爬完 county 级别的信息时服务器就连接不上了
     //代码里预制了从已经爬取到的文件中获取连接继续爬的能力
-    //由于从 country 开始信息量已经很大了，一般服务器会直接报错 可以使用 pullTownDataSync 从本地文件读取 country 信息继续爬
+    //由于从 county 开始信息量已经很大了，一般服务器会直接报错 可以使用 pullTownDataSync 从本地文件读取 county 信息继续爬
     requestProvince().then(function(proviceResult) {
         // request city
         fs.writeFileSync(ProvincePath, JSON.stringify(proviceResult));
@@ -129,11 +129,11 @@ function main(){
             urls = respResults;
         }
 
-        // 已经存在 country 信息
-        if (fileExists.countryPath) {
-            return JSON.parse(fs.readFileSync(CountryPath));
+        // 已经存在 county 信息
+        if (fileExists.countyPath) {
+            return JSON.parse(fs.readFileSync(CountyPath));
         } else {
-            // request country
+            // request county
             log.info("正在请求 => 区县")
             return Promise.all(urls.filter(x => x.url.length > 0).map(function(item) {
                 return newRequestPromise(item.url);
@@ -142,13 +142,13 @@ function main(){
 
     }).then(function(respResults) {
         let urls = [];
-        if (!fileExists.countryPath) {
+        if (!fileExists.countyPath) {
             respResults.forEach(function(item, index) {
-                urls = urls.concat(parseCountry(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href)));
+                urls = urls.concat(parseCounty(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href)));
             });
-            fs.writeFileSync(CountryPath, JSON.stringify(urls));
+            fs.writeFileSync(CountyPath, JSON.stringify(urls));
         } else {
-            //已经存在表示已经爬取到了 country 信息
+            //已经存在表示已经爬取到了 county 信息
             urls = respResults;
         }
 
@@ -243,7 +243,7 @@ function parseCity(html, parentUrl) {
 }
 
 // countytr
-function parseCountry(html, parentUrl) {
+function parseCounty(html, parentUrl) {
     let $ = renderDom(html);
     let result = [];
     $("tr.countytr").each(function(index, element) {
@@ -325,7 +325,7 @@ function parseVillage(html) {
 }
 
 
-function pullCountryDataSync(cityPath, offset) {
+function pullCountyDataSync(cityPath, offset) {
     offset = offset || 0
     let data = fs.readFileSync(cityPath);
     let jsonData = JSON.parse(data);
@@ -345,9 +345,9 @@ function pullCountryDataSync(cityPath, offset) {
                     urls = urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
                     fs.writeFileSync(TownPath, JSON.stringify(urls));
                 } else {
-                    urls = JSON.parse(fs.readFileSync(CountryPath) || []);
-                    urls = urls.concat(parseCountry(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
-                    fs.writeFileSync(CountryPath, JSON.stringify(urls));    
+                    urls = JSON.parse(fs.readFileSync(CountyPath) || []);
+                    urls = urls.concat(parseCounty(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
+                    fs.writeFileSync(CountyPath, JSON.stringify(urls));    
                 }
                 log.debug('foreach ==> ', offset + index);
             });
@@ -359,9 +359,9 @@ function pullCountryDataSync(cityPath, offset) {
 
 
 
-function pullTownDataSync(countryPath, offset) {
+function pullTownDataSync(countyPath, offset) {
     offset = offset || 0
-    let data = fs.readFileSync(countryPath);
+    let data = fs.readFileSync(countyPath);
     let jsonData = JSON.parse(data);
     jsonData.slice(offset).forEach(function(element, index) {
         let urls = [];
@@ -417,6 +417,6 @@ function pullVillageDataSync(townPath, offset) {
 
 
 // main();
-// pullCountryDataSync(CityPath, 0);
-// pullTownDataSync(CountryPath, 0);
+// pullCountyDataSync(CityPath, 0);
+// pullTownDataSync(CountyPath, 0);
 pullVillageDataSync(TownPath, 43302); //43302
