@@ -17,7 +17,7 @@ def make_data():
 
         if k == 'province':
             for index, i in enumerate(json_data):
-                mysql_data = "INSERT INTO province VALUES ('%s', '%s', '%s');\n" % (index + 1, i['name'], i['id'])  # noqa
+                mysql_data = "INSERT INTO province ('_id', 'name', 'province_id') VALUES ('%s', '%s', '%s');\n" % (index + 1, i['name'], i['id'])  # noqa
                 mysql_data_list.append(mysql_data)
 
         if k == 'city':
@@ -25,7 +25,7 @@ def make_data():
             for province_id in sorted(json_data.keys()):
                 for city in json_data[province_id]:
                     index += 1
-                    mysql_data = "INSERT INTO city VALUES ('%s', '%s', '%s', '%s');\n" % (index, city['name'], city['id'], province_id)  # noqa
+                    mysql_data = "INSERT INTO city ('_id', 'name', 'city_id', 'province_id') VALUES ('%s', '%s', '%s', '%s');\n" % (index, city['name'], city['id'], province_id)  # noqa
                     mysql_data_list.append(mysql_data)
 
         if k == 'county':
@@ -33,7 +33,7 @@ def make_data():
             for city_id in sorted(json_data.keys()):
                 for county in json_data[city_id]:
                     index += 1
-                    mysql_data = "INSERT INTO county  VALUES ('%s', '%s', '%s', '%s');\n" % (index, county['name'], county['id'], city_id)  # noqa
+                    mysql_data = "INSERT INTO county ('_id', 'name', 'county_id', 'city_id') VALUES ('%s', '%s', '%s', '%s');\n" % (index, county['name'], county['id'], city_id)  # noqa
                     mysql_data_list.append(mysql_data)
 
         if k == 'town':
@@ -41,7 +41,7 @@ def make_data():
             for county_id in sorted(json_data.keys()):
                 for town in json_data[county_id]:
                     index += 1
-                    mysql_data = "INSERT INTO town VALUES ('%s', '%s', '%s', '%s');\n" % (index, town['name'], town['id'], county_id)  # noqa
+                    mysql_data = "INSERT INTO town ('_id', 'name', 'town_id', 'county_id') VALUES ('%s', '%s', '%s', '%s');\n" % (index, town['name'], town['id'], county_id)  # noqa
                     mysql_data_list.append(mysql_data)
 
         if k == 'village':
@@ -49,7 +49,7 @@ def make_data():
             for town_id in sorted(json_data.keys()):
                 for village in json_data[town_id]:
                     index += 1
-                    mysql_data = "INSERT INTO village VALUES ('%s', '%s', '%s', '%s');\n" % (index, village['name'], village['id'], town_id)  # noqa
+                    mysql_data = "INSERT INTO village ('_id', 'name', 'village_id', 'town_id') VALUES ('%s', '%s', '%s', '%s');\n" % (index, village['name'], village['id'], town_id)  # noqa
                     mysql_data_list.append(mysql_data)
 
         if k in ['province', 'city', 'county', 'town', 'village']:
