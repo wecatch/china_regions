@@ -29,3 +29,6 @@ INSERT INTO province VALUES ('28', '甘肃省', '620000000000');
 INSERT INTO province VALUES ('29', '青海省', '630000000000');
 INSERT INTO province VALUES ('30', '宁夏回族自治区', '640000000000');
 INSERT INTO province VALUES ('31', '新疆维吾尔自治区', '650000000000');
+INSERT INTO province VALUES ('32', '台湾省', '710000000000');
+INSERT INTO province VALUES ('33', '香港特别行政区', '810000000000');
+INSERT INTO province VALUES ('34', '澳门特别行政区', '820000000000');
