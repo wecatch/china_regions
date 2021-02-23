@@ -7,7 +7,7 @@ from collections import OrderedDict
 def make_data():
     source_file_list = [
         'village', 'village_object', 'town', 'town_object', 'county', 'county_object', 'city', 'city_object', 'province', 'province_object']
-    for k in reversed(source_file_list):
+    for k in list(reversed(source_file_list))[0:-2]:
         data = codecs.open('json/%s.json' % k, 'r', 'utf-8').read()
         js_data = 'let %s = ' % k + data + '\nexport {%s} ' % k
         out_js = codecs.open('js/%s.js' % k, 'w', 'utf-8')
@@ -142,24 +142,24 @@ def pull_data():
         town_object_d, ensure_ascii=False, indent=4))
     out_town.write(json.dumps(town_d, ensure_ascii=False, indent=4))
 
-    village_object_d = OrderedDict()
-    village_d = OrderedDict()
+    # village_object_d = OrderedDict()
+    # village_d = OrderedDict()
 
-    for c in village_json:
-        parent_id = c['id'][0:9] + '000'
-        obj = {
-            "city": town_object_d[parent_id]['name'],
-            "name": c['name'],
-            "id": c['id']
-        }
-        village_object_d[c['id']] = obj
-        village_d.setdefault(parent_id, []).append(obj)
+    # for c in village_json:
+    #     parent_id = c['id'][0:9] + '000'
+    #     obj = {
+    #         "city": town_object_d[parent_id]['name'],
+    #         "name": c['name'],
+    #         "id": c['id']
+    #     }
+    #     village_object_d[c['id']] = obj
+    #     village_d.setdefault(parent_id, []).append(obj)
 
-    out_village_object = codecs.open('json/village_object.json', 'w', 'utf-8')
-    out_village = codecs.open('json/village.json', 'w', 'utf-8')
-    out_village_object.write(json.dumps(
-        village_object_d, ensure_ascii=False, indent=4))
-    out_village.write(json.dumps(village_d, ensure_ascii=False, indent=4))
+    # out_village_object = codecs.open('json/village_object.json', 'w', 'utf-8')
+    # out_village = codecs.open('json/village.json', 'w', 'utf-8')
+    # out_village_object.write(json.dumps(
+    #     village_object_d, ensure_ascii=False, indent=4))
+    # out_village.write(json.dumps(village_d, ensure_ascii=False, indent=4))
 
 
 def main():
