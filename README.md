@@ -66,6 +66,10 @@ village 的数据文件是压缩过的解压执行 `tar xvfz village.tar.gz .`
 
 ## 更新记录
 
+## 2021.2.23 
+
+更新到 http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2020/index.html 2020 最新数据
+
 ## 2019.4.17
 
 fix [#17](https://github.com/wecatch/china_regions/issues/17) 针对东莞市 中山市 儋州市三个不设区的市单独处理，

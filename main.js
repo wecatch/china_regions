@@ -439,6 +439,6 @@ function pullVillageDataSync(townPath, offset) {
 
 
 // main();
-pullCountyDataSync(CityPath, 0);
-pullTownDataSync(CountyPath, 0);
+// pullCountyDataSync(CityPath, 0);
+// pullTownDataSync(CountyPath, 0);
 // pullVillageDataSync(TownPath, 43302); //43302
