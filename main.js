@@ -10,12 +10,12 @@ const sleep = require('system-sleep');
 
 
 
-const host = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/";
+const host = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2020/";
 //这个 ip 是通过 dns 工具直接解析出来的，因为大量爬取需要进行多次 dns 解析，时间长了 nodejs 会报 dns 解析错误
 //应该是有缓存的，但是还是报 dns 解析有问题，这个 ip 可能会变，在使用时可以实时解析一下统计局的网站域名，如果不使用 ip
 //则把 IP 内容换成域名即可
-// const IP = 'www.stats.gov.cn'
-const IP = '219.235.129.117:80'
+const IP = 'www.stats.gov.cn'
+// const IP = '111.206.216.105'
 
 
 function absolutePath(url) {
@@ -129,6 +129,8 @@ function main(){
             urls = respResults;
         }
 
+        sleep(5000);
+
         // 已经存在 county 信息
         if (fileExists.countyPath) {
             return JSON.parse(fs.readFileSync(CountyPath));
@@ -152,6 +154,8 @@ function main(){
             urls = respResults;
         }
 
+        sleep(5000);
+
         // 已经存在 town 信息
         if (fileExists.townPath) {
             return JSON.parse(fs.readFileSync(TownPath));
@@ -173,6 +177,8 @@ function main(){
         } else {
             urls = respResults;
         }
+
+        sleep(5000);
 
         if (fileExists.villagePath) {
             return JSON.parse(fs.readFileSync(VillagePath))
@@ -324,7 +330,11 @@ function parseVillage(html) {
     return result;
 }
 
-
+/*
+args:
+    cityPath
+    offset 读取city的偏移
+*/
 function pullCountyDataSync(cityPath, offset) {
     offset = offset || 0
     let data = fs.readFileSync(cityPath);
@@ -341,24 +351,32 @@ function pullCountyDataSync(cityPath, offset) {
                 //空的文件内容必须是 []
                 //特殊处理东莞市
                 if(["441900000000", "442000000000", "460400000000"].includes(element.id)){
-                    urls = JSON.parse(fs.readFileSync(TownPath) || []);
+                    if(fileExists.townPath){
+                        urls = JSON.parse(fs.readFileSync(TownPath));
+                    }
                     urls = urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
                     fs.writeFileSync(TownPath, JSON.stringify(urls));
                 } else {
-                    urls = JSON.parse(fs.readFileSync(CountyPath) || []);
+                    if(fileExists.countyPath) {
+                        urls = JSON.parse(fs.readFileSync(CountyPath));
+                    }
                     urls = urls.concat(parseCounty(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
                     fs.writeFileSync(CountyPath, JSON.stringify(urls));    
                 }
                 log.debug('foreach ==> ', offset + index);
             });
-            sleep(500);
+            sleep(1000);
         }
     });
 }
 
 
 
-
+/*
+args:
+    cityPath
+    offset 读取county的偏移
+*/
 function pullTownDataSync(countyPath, offset) {
     offset = offset || 0
     let data = fs.readFileSync(countyPath);
@@ -373,12 +391,14 @@ function pullTownDataSync(countyPath, offset) {
                 encoding: null
             }, function(error, response, body) {
                 //空的文件内容必须是 []
-                urls = JSON.parse(fs.readFileSync(TownPath) || []);
+                if(fileExists.townPath){
+                    urls = JSON.parse(fs.readFileSync(TownPath));
+                }
                 urls = urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
                 fs.writeFileSync(TownPath, JSON.stringify(urls));
                 log.debug('foreach ==> ', offset + index);
             });
-            sleep(500);
+            sleep(1000);
         }
     });
 }
@@ -405,7 +425,9 @@ function pullVillageDataSync(townPath, offset) {
                 encoding: null
             }, function(error, response, body) {
                 //空的文件内容必须是 []
-                urls = JSON.parse(fs.readFileSync(VillagePath) || []);
+                if(fileExists.villagePath){
+                    urls = JSON.parse(fs.readFileSync(VillagePath));
+                }
                 urls = urls.concat(parseVillage(iconv.decode(body, 'gb2312')));
                 fs.writeFileSync(VillagePath, JSON.stringify(urls));
                 log.debug('foreach ==> ', offset + index);
@@ -417,6 +439,6 @@ function pullVillageDataSync(townPath, offset) {
 
 
 // main();
-// pullCountyDataSync(CityPath, 0);
-// pullTownDataSync(CountyPath, 0);
-pullVillageDataSync(TownPath, 43302); //43302
+pullCountyDataSync(CityPath, 0);
+pullTownDataSync(CountyPath, 0);
+// pullVillageDataSync(TownPath, 43302); //43302
