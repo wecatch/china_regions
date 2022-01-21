@@ -30,7 +30,7 @@
     "iconv-lite": "^0.4.24",
     "jquery": "^3.4.0",
     "jsdom": "^13.2.0",
-    "log4js": "^4.0.1",
+    "log4js": "^6.4.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
     "system-sleep": "^1.3.6",
