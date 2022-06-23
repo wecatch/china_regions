@@ -29,7 +29,7 @@
     "bluebird": "^3.5.3",
     "iconv-lite": "^0.4.24",
     "jquery": "^3.4.0",
-    "jsdom": "^13.2.0",
+    "jsdom": "^16.5.0",
     "log4js": "^4.0.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
